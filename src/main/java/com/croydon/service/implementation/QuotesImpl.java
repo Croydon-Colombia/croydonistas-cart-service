@@ -15,6 +15,7 @@ package com.croydon.service.implementation;
 
 import com.croydon.model.dao.QuotesDao;
 import com.croydon.model.entity.Quotes;
+import com.croydon.service.INewQuotes;
 import com.croydon.service.IQuotes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,10 +27,12 @@ import org.springframework.transaction.annotation.Transactional;
  */
 
 @Service
-public class QuotesImplementation implements IQuotes {
+public class QuotesImpl implements IQuotes {
 
     @Autowired
     private QuotesDao quotesDao;
+    @Autowired
+    private INewQuotes newQuotesService;
     
     @Transactional
     @Override
@@ -37,10 +40,15 @@ public class QuotesImplementation implements IQuotes {
         return quotesDao.save(quotes);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional()
     @Override
-    public Quotes findByCustomersId(String id) {//implementar logica para si no existe generar nuevo carrito...
-        return quotesDao.findByCustomersId(id);
+    public Quotes findByCustomersId(String id) {
+        Quotes quotesFind = quotesDao.findByCustomersId(id);
+        if(quotesFind == null){
+            return newQuotesService.makeNewQuotes(id);
+        }else{
+            return quotesFind;
+        }         
     }
 
     @Transactional
