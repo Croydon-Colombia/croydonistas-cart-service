@@ -24,23 +24,17 @@ import lombok.ToString;
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class QuoteItemsPK {
+public class ProductAttributesPK {
     
     @Basic(optional = false)
-    @Column(name = "customers_id")
-    public String customersId;
+    @Column(name = "attributes_id")
+    public int attributesId;
 
     @Basic(optional = false)
-    @Column(name = "quotes_id")
-    public long quotesId;
-
-    @Basic(optional = false)
-    @Column(name = "sku")
-    public String sku;
-
+    @Column(name = "products_id")
+    public String productsId;
 }

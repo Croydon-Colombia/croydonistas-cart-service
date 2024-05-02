@@ -13,12 +13,14 @@
  */
 package com.croydon.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
-import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
@@ -39,11 +41,14 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "quote_incentive_items")
-public class QuoteIncentiveItems {
+@Table(name = "attribute_values")
+public class AttributeValues {
     
-    @EmbeddedId
-    public QuoteIncentiveItemsPK quoteIncentiveItemsPK;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Basic(optional = false)
+    @Column(name = "id")
+    public Integer id;
 
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
@@ -53,36 +58,32 @@ public class QuoteIncentiveItems {
     @Temporal(TemporalType.TIMESTAMP)
     public Date updatedAt;
 
-    @Basic(optional = false)
-    @Column(name = "added")
-    public boolean added;
+    @Column(name = "code")
+    public String code;
+
+    @Column(name = "image")
+    public Boolean image;
+
+    @Column(name = "image_url")
+    public String imageUrl;
 
     @Basic(optional = false)
-    @Column(name = "incentives")
-    public double incentives;
+    @Column(name = "label")
+    public String label;
+
+    @Column(name = "path_image")
+    public String pathImage;
 
     @Basic(optional = false)
-    @Column(name = "line_number")
-    public int lineNumber;
+    @Lob
+    @Column(name = "value_attribute")
+    public String valueAttribute;
 
-    @Basic(optional = false)
-    @Column(name = "name")
-    public String name;
+    @Lob
+    @Column(name = "value_attribute_secondary")
+    public String valueAttributeSecondary;
 
-    @Basic(optional = false)
-    @Column(name = "qty")
-    public int qty;
-
-    @Column(name = "thumbnail")
-    public String thumbnail;
-
-    @Basic(optional = false)
-    @Column(name = "total")
-    public double total;
-
-    @JoinColumn(name = "quotes_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "attributes_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
-    @JsonIgnore
-    public Quotes quotes;
-
+    public Attributes attributesId;
 }

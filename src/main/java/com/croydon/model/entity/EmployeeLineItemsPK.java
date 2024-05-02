@@ -29,20 +29,20 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-class EmployeeLineItemsPK {
+public class EmployeeLineItemsPK {
     @Basic(optional = false)
     @Column(name = "customers_id")
-    private String customersId;
+    public String customersId;
 
     @Basic(optional = false)
     @Column(name = "id")
-    private long id;
+    public long id;
 
     @Basic(optional = false)
     @Column(name = "quotes_id")
-    private long quotesId;
+    public long quotesId;
 
     @Basic(optional = false)
     @Column(name = "sku")
-    private String sku;
+    public String sku;
 }

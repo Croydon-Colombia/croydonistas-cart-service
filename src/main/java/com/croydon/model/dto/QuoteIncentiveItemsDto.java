@@ -11,36 +11,35 @@
  * El uso de este software implica la aceptación de los términos y condiciones establecidos.
  *
  */
-package com.croydon.model.entity;
+package com.croydon.model.dto;
 
-import jakarta.persistence.Basic;
-import jakarta.persistence.Column;
-import lombok.AllArgsConstructor;
+import java.util.Date;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 /**
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-@ToString
-public class QuoteItemsPK {
+public class QuoteIncentiveItemsDto {
     
-    @Basic(optional = false)
-    @Column(name = "customers_id")
-    public String customersId;
+    public QuoteIncentiveItemsPKDto quoteIncentiveItemsPK;
 
-    @Basic(optional = false)
-    @Column(name = "quotes_id")
-    public long quotesId;
+    public Date createdAt;
 
-    @Basic(optional = false)
-    @Column(name = "sku")
-    public String sku;
+    public Date updatedAt;
 
+    public boolean added;
+
+    public double incentives;
+
+    public int lineNumber;
+
+    public String name;
+
+    public int qty;
+
+    public String thumbnail;
+
+    public double total;
 }

@@ -13,16 +13,18 @@
  */
 package com.croydon.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Basic;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
-import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import java.util.Collection;
 import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,17 +35,19 @@ import lombok.ToString;
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "quote_incentive_items")
-public class QuoteIncentiveItems {
+@Table(name = "attribute_types")
+public class AttributeTypes {
     
-    @EmbeddedId
-    public QuoteIncentiveItemsPK quoteIncentiveItemsPK;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Basic(optional = false)
+    @Column(name = "id")
+    public Integer id;
 
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
@@ -54,35 +58,14 @@ public class QuoteIncentiveItems {
     public Date updatedAt;
 
     @Basic(optional = false)
-    @Column(name = "added")
-    public boolean added;
-
-    @Basic(optional = false)
-    @Column(name = "incentives")
-    public double incentives;
-
-    @Basic(optional = false)
-    @Column(name = "line_number")
-    public int lineNumber;
+    @Column(name = "code")
+    public String code;
 
     @Basic(optional = false)
     @Column(name = "name")
     public String name;
 
-    @Basic(optional = false)
-    @Column(name = "qty")
-    public int qty;
-
-    @Column(name = "thumbnail")
-    public String thumbnail;
-
-    @Basic(optional = false)
-    @Column(name = "total")
-    public double total;
-
-    @JoinColumn(name = "quotes_id", referencedColumnName = "id", insertable = false, updatable = false)
-    @ManyToOne(optional = false)
-    @JsonIgnore
-    public Quotes quotes;
-
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "attributeTypesId")
+    public Collection<Attributes> attributesCollection;
+    
 }

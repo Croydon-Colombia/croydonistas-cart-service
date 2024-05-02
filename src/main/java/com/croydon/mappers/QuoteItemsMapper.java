@@ -11,36 +11,21 @@
  * El uso de este software implica la aceptación de los términos y condiciones establecidos.
  *
  */
-package com.croydon.model.entity;
+package com.croydon.mappers;
 
-import jakarta.persistence.Basic;
-import jakarta.persistence.Column;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import com.croydon.model.dto.QuoteItemsDto;
+import com.croydon.model.entity.QuoteItems;
+import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
 
 /**
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@ToString
-public class QuoteItemsPK {
+@Mapper
+public interface QuoteItemsMapper {
+    QuoteItemsMapper INSTANCE = Mappers.getMapper(QuoteItemsMapper.class);
     
-    @Basic(optional = false)
-    @Column(name = "customers_id")
-    public String customersId;
-
-    @Basic(optional = false)
-    @Column(name = "quotes_id")
-    public long quotesId;
-
-    @Basic(optional = false)
-    @Column(name = "sku")
-    public String sku;
-
+    QuoteItemsDto quoteItemsToQuoteItemsDto(QuoteItems quoteItems);
+    QuoteItems quoteItemsDtoToQuoteItems(QuoteItemsDto quoteItems);
 }

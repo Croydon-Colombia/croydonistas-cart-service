@@ -13,12 +13,11 @@
  */
 package com.croydon.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
@@ -39,11 +38,11 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "quote_incentive_items")
-public class QuoteIncentiveItems {
+@Table(name = "product_indices")
+public class ProductIndices {
     
     @EmbeddedId
-    public QuoteIncentiveItemsPK quoteIncentiveItemsPK;
+    public ProductIndicesPK productIndicesPK;
 
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
@@ -53,36 +52,11 @@ public class QuoteIncentiveItems {
     @Temporal(TemporalType.TIMESTAMP)
     public Date updatedAt;
 
-    @Basic(optional = false)
-    @Column(name = "added")
-    public boolean added;
+    @Lob
+    @Column(name = "attribute_value")
+    public String attributeValue;
 
-    @Basic(optional = false)
-    @Column(name = "incentives")
-    public double incentives;
-
-    @Basic(optional = false)
-    @Column(name = "line_number")
-    public int lineNumber;
-
-    @Basic(optional = false)
-    @Column(name = "name")
-    public String name;
-
-    @Basic(optional = false)
-    @Column(name = "qty")
-    public int qty;
-
-    @Column(name = "thumbnail")
-    public String thumbnail;
-
-    @Basic(optional = false)
-    @Column(name = "total")
-    public double total;
-
-    @JoinColumn(name = "quotes_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "products_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
-    @JsonIgnore
-    public Quotes quotes;
-
+    public Products products;
 }

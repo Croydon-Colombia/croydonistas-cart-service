@@ -29,14 +29,14 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-class QuoteTotalsPK {
+public class QuoteTotalsPK {
     
     @Basic(optional = false)
     @Column(name = "code")
-    private String code;
+    public String code;
 
     @Basic(optional = false)
     @Column(name = "quotes_id")
-    private long quotesId;
+    public long quotesId;
 
 }

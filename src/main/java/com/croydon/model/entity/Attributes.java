@@ -13,16 +13,20 @@
  */
 package com.croydon.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Basic;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
-import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import java.util.Collection;
 import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,17 +37,19 @@ import lombok.ToString;
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "quote_incentive_items")
-public class QuoteIncentiveItems {
+@Table(name = "attributes")
+public class Attributes {
     
-    @EmbeddedId
-    public QuoteIncentiveItemsPK quoteIncentiveItemsPK;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Basic(optional = false)
+    @Column(name = "id")
+    public Integer id;
 
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
@@ -53,36 +59,36 @@ public class QuoteIncentiveItems {
     @Temporal(TemporalType.TIMESTAMP)
     public Date updatedAt;
 
-    @Basic(optional = false)
-    @Column(name = "added")
-    public boolean added;
+    @Column(name = "class_implementation")
+    public String classImplementation;
 
     @Basic(optional = false)
-    @Column(name = "incentives")
-    public double incentives;
+    @Column(name = "code")
+    public String code;
 
     @Basic(optional = false)
-    @Column(name = "line_number")
-    public int lineNumber;
+    @Column(name = "filterable")
+    public boolean filterable;
+
+    @Column(name = "multiple")
+    public Boolean multiple;
 
     @Basic(optional = false)
     @Column(name = "name")
     public String name;
 
     @Basic(optional = false)
-    @Column(name = "qty")
-    public int qty;
+    @Column(name = "use_in_search")
+    public boolean useInSearch;
 
-    @Column(name = "thumbnail")
-    public String thumbnail;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "attributesId")
+    public Collection<AttributeValues> attributeValuesCollection;
 
-    @Basic(optional = false)
-    @Column(name = "total")
-    public double total;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "attributes")
+    public Collection<ProductAttributes> productAttributesCollection;
 
-    @JoinColumn(name = "quotes_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "attribute_types_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
-    @JsonIgnore
-    public Quotes quotes;
-
+    public AttributeTypes attributeTypesId;
+    
 }

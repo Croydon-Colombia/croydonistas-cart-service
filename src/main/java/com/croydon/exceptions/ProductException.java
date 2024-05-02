@@ -11,36 +11,14 @@
  * El uso de este software implica la aceptación de los términos y condiciones establecidos.
  *
  */
-package com.croydon.model.entity;
-
-import jakarta.persistence.Basic;
-import jakarta.persistence.Column;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+package com.croydon.exceptions;
 
 /**
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@ToString
-public class QuoteItemsPK {
-    
-    @Basic(optional = false)
-    @Column(name = "customers_id")
-    public String customersId;
-
-    @Basic(optional = false)
-    @Column(name = "quotes_id")
-    public long quotesId;
-
-    @Basic(optional = false)
-    @Column(name = "sku")
-    public String sku;
-
+public class ProductException extends Exception{
+    public ProductException(String errorMsg){
+        super(errorMsg);
+    }
 }

@@ -13,40 +13,30 @@
  */
 package com.croydon.service.implementation;
 
-import com.croydon.model.dao.QuotesDao;
-import com.croydon.model.entity.Quotes;
-import com.croydon.service.IQuotes;
+import com.croydon.exceptions.ProductException;
+import com.croydon.model.dao.ProductsDao;
+import com.croydon.model.entity.Products;
+import com.croydon.service.IProducts;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-
-@Service
-public class QuotesImpl implements IQuotes {
+@Component
+public class ProductsImpl implements IProducts {
 
     @Autowired
-    private QuotesDao quotesDao;
+    private ProductsDao productsDao;
+    
+    @Override
+    public Products findProductById(String id) throws ProductException{
         
-    @Transactional
-    @Override
-    public Quotes save(Quotes quotes) {
-        return quotesDao.save(quotes);
-    }
-
-    @Transactional()
-    @Override
-    public Quotes findByCustomersId(String id) {
-        return quotesDao.findByCustomersId(id);
-    }
-
-    @Transactional
-    @Override
-    public void delete(Quotes quotes) {
-        quotesDao.delete(quotes);
+        return productsDao.findById(id)
+                            .orElseThrow(() -> 
+                            new ProductException("Producto " + id +" no encontrado en DB"));
+        
     }
     
 }

@@ -29,16 +29,16 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-class QuoteIncentiveItemsPK {
+public class QuoteIncentiveItemsPK {
     @Basic(optional = false)
     @Column(name = "customers_id")
-    private String customersId;
+    public String customersId;
 
     @Basic(optional = false)
     @Column(name = "quotes_id")
-    private long quotesId;
+    public long quotesId;
 
     @Basic(optional = false)
     @Column(name = "sku")
-    private String sku;
+    public String sku;
 }

@@ -29,18 +29,13 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class QuoteItemsPK {
+public class ConfigurableProductOptionsPK {
     
     @Basic(optional = false)
-    @Column(name = "customers_id")
-    public String customersId;
+    @Column(name = "attribute_code")
+    public String attributeCode;
 
     @Basic(optional = false)
-    @Column(name = "quotes_id")
-    public long quotesId;
-
-    @Basic(optional = false)
-    @Column(name = "sku")
-    public String sku;
-
+    @Column(name = "products_id")
+    public String productsId;
 }

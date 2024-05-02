@@ -13,21 +13,22 @@
  */
 package com.croydon.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
-import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import java.util.Date;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 /**
  *
@@ -39,11 +40,14 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "quote_incentive_items")
-public class QuoteIncentiveItems {
+@Table(name = "images")
+public class Images {
     
-    @EmbeddedId
-    public QuoteIncentiveItemsPK quoteIncentiveItemsPK;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Basic(optional = false)
+    @Column(name = "id")
+    public Long id;
 
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
@@ -54,35 +58,31 @@ public class QuoteIncentiveItems {
     public Date updatedAt;
 
     @Basic(optional = false)
-    @Column(name = "added")
-    public boolean added;
+    @Column(name = "disabled")
+    public boolean disabled;
 
     @Basic(optional = false)
-    @Column(name = "incentives")
-    public double incentives;
+    @Column(name = "file")
+    public String file;
+
+    @Column(name = "label")
+    public String label;
+
+    @Column(name = "media_type")
+    public String mediaType;
+
+    @Column(name = "position")
+    public Integer position;
 
     @Basic(optional = false)
-    @Column(name = "line_number")
-    public int lineNumber;
+    @Column(name = "remote")
+    public boolean remote;
 
-    @Basic(optional = false)
-    @Column(name = "name")
-    public String name;
+    @Column(name = "types")
+    public String types;
 
-    @Basic(optional = false)
-    @Column(name = "qty")
-    public int qty;
-
-    @Column(name = "thumbnail")
-    public String thumbnail;
-
-    @Basic(optional = false)
-    @Column(name = "total")
-    public double total;
-
-    @JoinColumn(name = "quotes_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "products_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
-    @JsonIgnore
-    public Quotes quotes;
-
+    public Products productsId;
+    
 }
