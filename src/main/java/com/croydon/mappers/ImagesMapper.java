@@ -13,8 +13,8 @@
  */
 package com.croydon.mappers;
 
-import com.croydon.model.dto.QuoteTotalsDto;
-import com.croydon.model.entity.QuoteTotals;
+import com.croydon.model.dto.ImagesDto;
+import com.croydon.model.entity.Images;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
@@ -22,13 +22,11 @@ import org.mapstruct.factory.Mappers;
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-
 @Mapper(componentModel = "spring")
-public interface QuoteTotalsMapper {
+public interface ImagesMapper {
+    ImagesMapper INSTANCE = Mappers.getMapper(ImagesMapper.class);
     
-    QuoteTotalsMapper INSTANCE = Mappers.getMapper(QuoteTotalsMapper.class);
-    
-    QuoteTotalsDto quoteTotalsToQuoteTotalsDto(QuoteTotals quotes);
-    QuoteTotals quotesTotalsDtoToQuoteTotals(QuoteTotalsDto quotes);
-    
+     ImagesDto ImagesToImagesDto(Images images);
+     
+     Images ImagesDtoToImages(ImagesDto images);
 }

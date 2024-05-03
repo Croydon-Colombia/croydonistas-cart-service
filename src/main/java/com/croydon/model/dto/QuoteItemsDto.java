@@ -24,7 +24,7 @@ import lombok.Data;
 @Data
 public class QuoteItemsDto {
     
-    protected QuoteItemsPKDto quoteItemsPK;
+    public QuoteItemsPKDto quoteItemsPK;
 
     public Date createdAt;
 

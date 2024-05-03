@@ -26,6 +26,8 @@ public interface IQuotes {
     
     Quotes findByCustomersId (String id);
     
+    Quotes findByQuotesId (Long id);
+    
     void delete(Quotes quotes);
     
 }

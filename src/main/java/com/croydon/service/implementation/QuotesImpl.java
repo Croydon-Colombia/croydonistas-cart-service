@@ -48,5 +48,10 @@ public class QuotesImpl implements IQuotes {
     public void delete(Quotes quotes) {
         quotesDao.delete(quotes);
     }
+
+    @Override
+    public Quotes findByQuotesId(Long id) {
+        return quotesDao.findById(id).orElseThrow();
+    }
     
 }

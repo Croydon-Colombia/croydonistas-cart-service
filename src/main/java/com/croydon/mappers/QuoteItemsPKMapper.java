@@ -22,7 +22,7 @@ import org.mapstruct.factory.Mappers;
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-@Mapper
+@Mapper(componentModel = "spring")
 public interface QuoteItemsPKMapper {
     QuoteItemsPKMapper INSTANCE = Mappers.getMapper(QuoteItemsPKMapper.class);
     

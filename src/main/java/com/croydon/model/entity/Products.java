@@ -37,7 +37,6 @@ import lombok.ToString;
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -45,7 +44,7 @@ import lombok.ToString;
 @Entity
 @Table(name = "products")
 public class Products {
-   
+
     @Id
     @Basic(optional = false)
     @Column(name = "id")

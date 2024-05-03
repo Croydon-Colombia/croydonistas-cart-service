@@ -11,24 +11,26 @@
  * El uso de este software implica la aceptación de los términos y condiciones establecidos.
  *
  */
-package com.croydon.mappers;
+package com.croydon.model.dto;
 
-import com.croydon.model.dto.QuoteTotalsDto;
-import com.croydon.model.entity.QuoteTotals;
-import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
+import java.util.Date;
+import lombok.Data;
 
 /**
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
+@Data
+public class AttributeTypesDto {
+    
+    public Integer id;
 
-@Mapper(componentModel = "spring")
-public interface QuoteTotalsMapper {
-    
-    QuoteTotalsMapper INSTANCE = Mappers.getMapper(QuoteTotalsMapper.class);
-    
-    QuoteTotalsDto quoteTotalsToQuoteTotalsDto(QuoteTotals quotes);
-    QuoteTotals quotesTotalsDtoToQuoteTotals(QuoteTotalsDto quotes);
+    public Date createdAt;
+
+    public Date updatedAt;
+
+    public String code;
+
+    public String name;
     
 }
