@@ -13,8 +13,10 @@
  */
 package com.croydon.controller.V1;
 
+import com.croydon.exceptions.UnauthorizedException;
 import com.croydon.model.dto.QuotesDto;
 import com.croydon.model.dto.ShoppingCartItemDto;
+import com.croydon.security.CustomerAuth;
 import com.croydon.service.IShoppingCartManager;
 import com.croydon.utilities.ApiResponse;
 import jakarta.validation.Valid;
@@ -42,19 +44,38 @@ public class QuoteController {
     @Autowired
     private IShoppingCartManager shoppingCartManagerService;
     
+    @Autowired
+    private CustomerAuth customerAuth;
+    
+    
     /*
     Getters methods
     */
+     @GetMapping("quotes")
+    public String prueba(){
+      // var customer =  this.customerAuth.get();
+       //System.out.println("Cliente autenticado: " + customer.getFirstName());
+      // return ("Cliente autenticado: " + customer.getFirstName());  
+       return ("App Croydonistas cart Services");
+    }
+    
+    
     @GetMapping("quotes/customer/{customerId}")
+    
     public ResponseEntity<ApiResponse<QuotesDto>> findQuotesByClientId(@PathVariable("customerId") String customerId){
+      var customer =  this.customerAuth.get();
         try {
             QuotesDto response = shoppingCartManagerService.getOrCreateCart(customerId);
             return ResponseEntity.ok(new ApiResponse<>(response, "Success"));
-        } catch (DataException ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ApiResponse<>(null, ex.getMessage()));
-        }         
-        
+        } catch (UnauthorizedException ex) {
+            // Devolver una respuesta de error 403 Forbidden en caso de UnauthorizedException
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ApiResponse<>(null, "No estás autorizado"));    
+//        } catch (DataException ex) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                .body(new ApiResponse<>(null, ex.getMessage()));
+//        }         
+        }
     }
     
     /*
