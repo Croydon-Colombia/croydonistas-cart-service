@@ -13,6 +13,7 @@
  */
 package com.croydon.model.dao;
 
+import com.croydon.model.entity.Customers;
 import com.croydon.model.entity.Quotes;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -22,10 +23,8 @@ import org.springframework.data.repository.query.Param;
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-
 public interface QuotesDao extends CrudRepository<Quotes, Long> {
-    
-    @Query("SELECT q FROM Quotes q WHERE q.customersId = :customerId and available = true")
-    Quotes findByCustomersId(@Param("customerId") String customerId);
-    
+
+    @Query("SELECT q FROM Quotes q WHERE q.customersId = :customer and available = true")
+    Quotes findByCustomersId(@Param("customer") Customers customer);
 }

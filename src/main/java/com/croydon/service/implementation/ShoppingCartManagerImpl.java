@@ -14,18 +14,24 @@
 package com.croydon.service.implementation;
 
 import com.croydon.exceptions.ProductException;
+import com.croydon.exceptions.ShippingAddressException;
 import com.croydon.mappers.ProductsToQuotesItemsMapper;
 import com.croydon.mappers.QuotesMapper;
 import com.croydon.model.dto.QuoteItemsDto;
+import com.croydon.model.dto.QuoteItemsPKDto;
 import com.croydon.model.dto.QuotesDto;
 import com.croydon.model.dto.ShoppingCartItemDto;
+import com.croydon.model.entity.Customers;
 import com.croydon.model.entity.Products;
 import com.croydon.model.entity.Quotes;
+import com.croydon.service.CollectsQuoteTotals;
 import com.croydon.service.IAddQuoteItem;
+import com.croydon.service.ICustomers;
 import com.croydon.service.INewQuotes;
 import com.croydon.service.IProducts;
 import com.croydon.service.IQuotes;
 import com.croydon.service.IShoppingCartManager;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,11 +62,18 @@ public class ShoppingCartManagerImpl implements IShoppingCartManager {
     @Autowired
     private IProducts productsComponent;
 
+    @Autowired
+    private CollectsQuoteTotals collectsQuoteTotalsService;
+
+    @Autowired
+    private ICustomers customersService;
+
     @Override
     public QuotesDto getOrCreateCart(String customerId) {
-
-        Quotes quote = quotesService.findByCustomersId(customerId);
+        Optional<Customers> customer = customersService.findById(customerId);
+        Quotes quote = quotesService.findByCustomersId(customer.get());
         Quotes quotesResponse = (quote == null) ? newQuotesService.makeNewQuotes(customerId) : quote;
+        quotesService.save(quotesResponse);
         return quotesMapper.quotesToQuotesDto(quotesResponse);
 
     }
@@ -75,7 +88,9 @@ public class ShoppingCartManagerImpl implements IShoppingCartManager {
 
             QuoteItemsDto quoteItemsDto = productsToQuotesItemsMapper.ProductsToQuoteItemsDto(dbProduct);
             QuotesDto quotesDto = quotesMapper.quotesToQuotesDto(dbQuotes);
-
+            
+            quoteItemsDto.setQuoteItemsPK(setQuoteItemsPKDto(quotesDto, dbProduct));
+            
             boolean itemExists = quotesDto.getQuoteItemsCollection().stream()
                     .anyMatch(item -> item.getQuoteItemsPK().equals(quoteItemsDto.getQuoteItemsPK()));
 
@@ -85,23 +100,39 @@ public class ShoppingCartManagerImpl implements IShoppingCartManager {
             } else {
                 //El articulo NO existe en el carrito
                 QuotesDto updatedQuotesDto = IAddQuoteItemService.addNewQuoteItem(quotesDto, quoteItemsDto);
+                QuotesDto quoteDtoWithTotals = collectsQuoteTotalsService.quotesDto(updatedQuotesDto);
+                quotesService.save(quotesMapper.quotesDtoToQuotes(quoteDtoWithTotals));
+                quotesDto = quoteDtoWithTotals;
             }
-            return null;
+            return quotesDto;
             /*
             X   Consultar Inventario en JDE
             X   Consultas a base de datos Quotes y QuotesItems
             X   Mapear de Entity a Dto
                 Logica para item ya existe
             X   Logica para item no existe
-                Continuar Calcular totales...
-                Guardar en base de datos
+            X   Continuar Calcular totales...
+            X   Guardar en base de datos
                 Retornar Quotes ya procesado
              */
 
         } catch (ProductException ex) {
             Logger.getLogger(ShoppingCartManagerImpl.class.getName()).log(Level.SEVERE, null, ex);
             return null; //-> cambiar esto por una custom exception 'CrudProductException'
+        } catch (ShippingAddressException ex) {
+            Logger.getLogger(ShoppingCartManagerImpl.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
         }
+    }
+
+    private QuoteItemsPKDto setQuoteItemsPKDto(QuotesDto quotesDto, Products dbProduct) {
+        QuoteItemsPKDto quoteItemsPKDto = new QuoteItemsPKDto();
+
+        quoteItemsPKDto.setCustomersId(quotesDto.getCustomersId().getId());
+        quoteItemsPKDto.setQuotesId(quotesDto.getId());
+        quoteItemsPKDto.setSku(dbProduct.getId());
+
+        return quoteItemsPKDto;
     }
 
 }

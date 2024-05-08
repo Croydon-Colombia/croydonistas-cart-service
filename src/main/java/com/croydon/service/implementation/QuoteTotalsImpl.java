@@ -11,27 +11,35 @@
  * El uso de este software implica la aceptación de los términos y condiciones establecidos.
  *
  */
-package com.croydon.mappers;
+package com.croydon.service.implementation;
 
-import com.croydon.model.dto.QuoteTotalsDto;
+import com.croydon.model.dao.QuoteTotalsDao;
 import com.croydon.model.entity.QuoteTotals;
+import com.croydon.model.entity.QuoteTotalsPK;
+import com.croydon.service.IQuoteTotals;
 import java.util.List;
-import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
+import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
+@Service
+public class QuoteTotalsImpl implements IQuoteTotals {
 
-@Mapper(componentModel = "spring")
-public interface QuoteTotalsMapper {
-    
-    QuoteTotalsMapper INSTANCE = Mappers.getMapper(QuoteTotalsMapper.class);
-    
-    QuoteTotalsDto quoteTotalsToQuoteTotalsDto(QuoteTotals quotes);
-    QuoteTotals quotesTotalsDtoToQuoteTotals(QuoteTotalsDto quotes);
-    
-    List<QuoteTotals> listQuotesTotalsDtoToQuoteTotals(List<QuoteTotalsDto> quotes);
+    @Autowired
+    QuoteTotalsDao quoteTotalsService;
+
+    @Override
+    public Optional<QuoteTotals> findByPk(QuoteTotalsPK pk) {
+        return quoteTotalsService.findById(pk);
+    }
+
+    @Override
+    public void saveAll(List<QuoteTotals> totals) {
+        quoteTotalsService.saveAll(totals);
+    }
     
 }

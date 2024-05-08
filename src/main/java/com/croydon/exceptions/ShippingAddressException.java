@@ -11,24 +11,19 @@
  * El uso de este software implica la aceptación de los términos y condiciones establecidos.
  *
  */
-package com.croydon.service;
-
-import com.croydon.model.entity.Customers;
-import com.croydon.model.entity.Quotes;
+package com.croydon.exceptions;
 
 /**
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-
-public interface IQuotes {
+public class ShippingAddressException extends Exception {
     
-    Quotes save(Quotes quotes);
+    public ShippingAddressException(String message, Throwable cause) {
+        super(message, cause);
+    }
     
-    Quotes findByCustomersId (Customers id);
-    
-    Quotes findByQuotesId (Long id);
-    
-    void delete(Quotes quotes);
-    
+    public ShippingAddressException(String message) {
+        super(message);
+    }
 }

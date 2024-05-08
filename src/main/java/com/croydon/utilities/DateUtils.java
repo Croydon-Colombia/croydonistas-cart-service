@@ -11,24 +11,21 @@
  * El uso de este software implica la aceptación de los términos y condiciones establecidos.
  *
  */
-package com.croydon.service;
+package com.croydon.utilities;
 
-import com.croydon.model.entity.Customers;
-import com.croydon.model.entity.Quotes;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 
 /**
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-
-public interface IQuotes {
+public class DateUtils {
     
-    Quotes save(Quotes quotes);
-    
-    Quotes findByCustomersId (Customers id);
-    
-    Quotes findByQuotesId (Long id);
-    
-    void delete(Quotes quotes);
+    public static Date getCurrentDate() {
+        LocalDateTime localDateTime = LocalDateTime.now();
+        return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+    }
     
 }

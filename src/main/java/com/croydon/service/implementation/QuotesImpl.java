@@ -14,6 +14,7 @@
 package com.croydon.service.implementation;
 
 import com.croydon.model.dao.QuotesDao;
+import com.croydon.model.entity.Customers;
 import com.croydon.model.entity.Quotes;
 import com.croydon.service.IQuotes;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,8 +40,8 @@ public class QuotesImpl implements IQuotes {
 
     @Transactional()
     @Override
-    public Quotes findByCustomersId(String id) {
-        return quotesDao.findByCustomersId(id);
+    public Quotes findByCustomersId(Customers customerId) {
+        return quotesDao.findByCustomersId(customerId);
     }
 
     @Transactional

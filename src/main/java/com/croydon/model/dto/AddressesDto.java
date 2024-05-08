@@ -11,24 +11,45 @@
  * El uso de este software implica la aceptación de los términos y condiciones establecidos.
  *
  */
-package com.croydon.service;
+package com.croydon.model.dto;
 
-import com.croydon.model.entity.Customers;
-import com.croydon.model.entity.Quotes;
+import com.croydon.model.entity.*;
+import java.util.Date;
+import lombok.Data;
 
 /**
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
+@Data
+public class AddressesDto {
+    
+    public Long id;
 
-public interface IQuotes {
-    
-    Quotes save(Quotes quotes);
-    
-    Quotes findByCustomersId (Customers id);
-    
-    Quotes findByQuotesId (Long id);
-    
-    void delete(Quotes quotes);
+    public Date createdAt;
+
+    public Date updatedAt;
+
+    public String address;
+
+    public boolean billing;
+
+    public String email;
+
+    public String firstName;
+
+    public String lastName;
+
+    public String middleName;
+
+    public String phone;
+
+    public String shan;
+
+    public boolean shipping;
+
+    public String suffixName;
+
+    public CitiesDto citiesId;
     
 }

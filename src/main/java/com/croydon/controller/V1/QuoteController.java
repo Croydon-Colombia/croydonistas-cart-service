@@ -69,8 +69,7 @@ public class QuoteController {
     @PostMapping("products/add-or-update")
     public ResponseEntity<ApiResponse<QuotesDto>> addProduct(@Valid @RequestBody ShoppingCartItemDto itemsRequest){
         QuotesDto response = shoppingCartManagerService.addOrUpdateCartProduct(itemsRequest);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ApiResponse<>(null, "Not implemented!"));
+        return ResponseEntity.ok(new ApiResponse<>(response, "Success"));
     }
     
     @PostMapping("products/delete")

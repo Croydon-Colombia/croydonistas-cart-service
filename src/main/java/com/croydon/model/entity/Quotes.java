@@ -20,6 +20,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
@@ -177,10 +179,9 @@ public class Quotes {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "quotes")
     public Collection<QuoteTotals> quoteTotalsCollection;
 
-    //@JoinColumn(name = "customers_id", referencedColumnName = "id")
-    //@ManyToOne(optional = false)
-    @Column(name = "customers_id")
-    public String customersId;
+    @JoinColumn(name = "customers_id", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private Customers customersId;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "quotes")
     public Collection<QuoteItems> quoteItemsCollection;

@@ -13,22 +13,15 @@
  */
 package com.croydon.service;
 
-import com.croydon.model.entity.Customers;
-import com.croydon.model.entity.Quotes;
+import com.croydon.model.dto.QuoteItemsDto;
+import com.croydon.model.dto.QuotesDto;
 
 /**
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-
-public interface IQuotes {
+public interface IUpdateQuoteItems {
     
-    Quotes save(Quotes quotes);
-    
-    Quotes findByCustomersId (Customers id);
-    
-    Quotes findByQuotesId (Long id);
-    
-    void delete(Quotes quotes);
+    QuotesDto updateQuoteItem(QuotesDto quotesDto, QuoteItemsDto quoteItemsDto);
     
 }

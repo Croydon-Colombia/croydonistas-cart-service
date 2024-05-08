@@ -13,22 +13,19 @@
  */
 package com.croydon.service;
 
-import com.croydon.model.entity.Customers;
-import com.croydon.model.entity.Quotes;
+import com.croydon.model.entity.QuoteTotals;
+import com.croydon.model.entity.QuoteTotalsPK;
+import java.util.List;
+import java.util.Optional;
 
 /**
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-
-public interface IQuotes {
+public interface IQuoteTotals {
     
-    Quotes save(Quotes quotes);
+    Optional<QuoteTotals> findByPk(QuoteTotalsPK pk);
     
-    Quotes findByCustomersId (Customers id);
-    
-    Quotes findByQuotesId (Long id);
-    
-    void delete(Quotes quotes);
+    void saveAll(List<QuoteTotals> totals);
     
 }

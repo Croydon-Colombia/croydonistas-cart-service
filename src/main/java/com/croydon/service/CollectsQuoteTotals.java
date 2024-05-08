@@ -13,22 +13,15 @@
  */
 package com.croydon.service;
 
-import com.croydon.model.entity.Customers;
-import com.croydon.model.entity.Quotes;
+import com.croydon.exceptions.ShippingAddressException;
+import com.croydon.model.dto.QuotesDto;
 
 /**
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-
-public interface IQuotes {
+public interface CollectsQuoteTotals {
     
-    Quotes save(Quotes quotes);
-    
-    Quotes findByCustomersId (Customers id);
-    
-    Quotes findByQuotesId (Long id);
-    
-    void delete(Quotes quotes);
+    QuotesDto quotesDto(QuotesDto quote) throws ShippingAddressException;
     
 }

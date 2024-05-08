@@ -100,7 +100,7 @@ public class QuotesDto {
 
     public Collection<QuoteTotalsDto> quoteTotalsCollection;
 
-    public String customersId;
+    public CustomersDto customersId;
 
     public Collection<QuoteItemsDto> quoteItemsCollection;
 

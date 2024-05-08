@@ -62,7 +62,12 @@
             <artifactId>mapstruct</artifactId>
             <version>1.5.5.Final</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>4.4</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
 
     <build>

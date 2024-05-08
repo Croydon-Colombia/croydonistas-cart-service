@@ -37,7 +37,15 @@ public interface ProductsToQuotesItemsMapper {
     @Mapping(target = "thumbnail", source = "imagesCollection")
     @Mapping(target = "basePrice", expression = "java(mapPrice(products))")
     @Mapping(target = "originalBasePrice", expression = "java(mapPrice(products))")
+    @Mapping(target = "originalPercentDiscount", expression = "java(mapOriginalPercentDiscount(products))")
     QuoteItemsDto ProductsToQuoteItemsDto(Products products);
+    
+    default double mapOriginalPercentDiscount(Products product){
+        if (product.getCustomerDiscount() != null) {
+            return product.getCustomerDiscount();
+        }
+        return 0;
+    }
 
     default String mapImagesToThumbnail(Collection<Images> imagesCollection) {
         if (imagesCollection != null && !imagesCollection.isEmpty()) {

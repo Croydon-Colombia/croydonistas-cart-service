@@ -17,6 +17,8 @@ import com.croydon.model.dto.QuoteItemsDto;
 import com.croydon.model.dto.QuoteItemsPKDto;
 import com.croydon.model.dto.QuotesDto;
 import com.croydon.service.IAddQuoteItem;
+import com.croydon.utilities.DateUtils;
+import java.util.Date;
 import org.springframework.stereotype.Service;
 
 /**
@@ -29,16 +31,23 @@ public class AddQuoteItemImpl implements IAddQuoteItem {
     @Override
     public QuotesDto addNewQuoteItem(QuotesDto quotesDto, QuoteItemsDto quoteItemsDto) {
         
+        Date currentDate = DateUtils.getCurrentDate();
         QuoteItemsPKDto quoteItemsPKDto = new QuoteItemsPKDto();
-        quoteItemsPKDto.setCustomersId(quotesDto.getCustomersId());
+        quoteItemsPKDto.setCustomersId(quotesDto.getCustomersId().getId());
         quoteItemsPKDto.setQuotesId(quotesDto.getId());
         quoteItemsPKDto.setSku(quoteItemsDto.getQuoteItemsPK().getSku());
-
+        
+        quoteItemsDto.setLineNumber(quotesDto.getLineNumber());
+        quoteItemsDto.setTaxCode(quoteItemsDto.getTaxPercent() + "%");
         quoteItemsDto.setQuoteItemsPK(quoteItemsPKDto);
+        quoteItemsDto.setCreatedAt(currentDate);
+        quoteItemsDto.setUpdatedAt(currentDate);
 
         quotesDto.getQuoteItemsCollection().add(quoteItemsDto);
-
-        //Nota: Implementar manejo de secuencia de linea
+        
+        int lineNumber = quotesDto.getLineNumber();
+        lineNumber++;        
+        quotesDto.setLineNumber(lineNumber);
         
         return quotesDto;
     }

@@ -11,24 +11,15 @@
  * El uso de este software implica la aceptación de los términos y condiciones establecidos.
  *
  */
-package com.croydon.service;
+package com.croydon.model.dao;
 
 import com.croydon.model.entity.Customers;
-import com.croydon.model.entity.Quotes;
+import org.springframework.data.repository.CrudRepository;
 
 /**
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-
-public interface IQuotes {
-    
-    Quotes save(Quotes quotes);
-    
-    Quotes findByCustomersId (Customers id);
-    
-    Quotes findByQuotesId (Long id);
-    
-    void delete(Quotes quotes);
+public interface CustomersDao extends CrudRepository<Customers, String> {
     
 }

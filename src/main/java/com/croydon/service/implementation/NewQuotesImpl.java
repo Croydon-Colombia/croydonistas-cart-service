@@ -13,11 +13,11 @@
  */
 package com.croydon.service.implementation;
 
+import com.croydon.model.entity.Customers;
 import com.croydon.model.entity.Quotes;
 import com.croydon.service.INewQuotes;
 import com.croydon.service.IPurchaseOrderIncrementId;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import com.croydon.utilities.DateUtils;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,21 +31,28 @@ public class NewQuotesImpl implements INewQuotes {
     
     @Autowired
     private IPurchaseOrderIncrementId purchaseOrderIncrementIdService;
+    @Autowired
+    private CustomersImpl CustomersService;
 
     @Override
     public Quotes makeNewQuotes(String customerId) {
         
         Quotes quote = new Quotes();
+        Date currentDate = DateUtils.getCurrentDate();
         
-        String purchaseOrderIncrement = purchaseOrderIncrementIdService.getNextPurchaseOrderId();
-        LocalDateTime localDateTime = LocalDateTime.now();
-        Date date = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+        String purchaseOrderIncrement = purchaseOrderIncrementIdService.getNextPurchaseOrderId();        
         
         quote.setIncrementId(purchaseOrderIncrement);
-        quote.setCustomersId(customerId);
+        
+        Customers customer = CustomersService.findById(customerId).get();
+        
+        quote.setDiscountAmount(customer.getDiscount());
+        quote.setCustomersId(customer);        
         quote.setAvailable(true);
-        quote.setCreatedAt(date);
-        quote.setUpdatedAt(date);
+        quote.setCreatedAt(currentDate);
+        quote.setUpdatedAt(currentDate);
+        quote.setLineNumber(1);
+        
         return quote;
     }
     
