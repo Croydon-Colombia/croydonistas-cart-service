@@ -13,6 +13,7 @@
  */
 package com.croydon.service;
 
+import com.croydon.model.dto.AddressesDto;
 import com.croydon.model.dto.QuoteItemsDto;
 import com.croydon.model.dto.QuotesDto;
 import com.croydon.model.entity.Products;
@@ -21,8 +22,6 @@ import com.croydon.model.entity.Products;
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-public interface IAddQuoteItem {
-    
-    QuotesDto addNewQuoteItem(QuotesDto quotesDto, QuoteItemsDto quoteItemsDto, Products product);
-    
+public interface IQuoteItemsTaxesCalculator {
+    QuoteItemsDto calculateItemTotals(QuotesDto quote, QuoteItemsDto quoteItem, AddressesDto shippingAddress, Products products);
 }

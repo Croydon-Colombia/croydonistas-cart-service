@@ -44,13 +44,13 @@ public class OrderAmountExcludingTaxesCalculatorImpl extends TotalCalculatorStra
     }
 
     @Override
-    public QuoteTotalsDto calculateTotal(QuotesDto quote, QuoteTotalsDto quoteTotal, List<QuoteItemsDto> quoteItemList) throws ShippingAddressException {
+    public QuoteTotalsDto calculateTotal(QuotesDto quote, QuoteTotalsDto quoteTotal) throws ShippingAddressException {
         
-        double total = quoteItemList.stream()
+        double total = quote.getQuoteItemsCollection().stream()
                 .mapToDouble(QuoteItemsDto::getTotalBasePrice)
                 .sum();
 
-        double subtotal = quoteItemList.stream()
+        double subtotal = quote.getQuoteItemsCollection().stream()
                 .mapToDouble(QuoteItemsDto::getTotalOriginalBasePrice)
                 .sum();
 

@@ -11,10 +11,12 @@
  * El uso de este software implica la aceptación de los términos y condiciones establecidos.
  *
  */
+
 package com.croydon.mappers;
 
-import com.croydon.model.dto.ProductsDto;
-import com.croydon.model.entity.Products;
+import com.croydon.model.dto.AddressesDto;
+import com.croydon.model.entity.Addresses;
+import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
@@ -23,10 +25,14 @@ import org.mapstruct.factory.Mappers;
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
 @Mapper(componentModel = "spring")
-public interface ProductsMapper {
-    ProductsMapper INSTANCE = Mappers.getMapper(ProductsMapper.class);
+public interface AddressesMapper {
+    AddressesMapper INSTANCE = Mappers.getMapper(AddressesMapper.class);
     
-    ProductsDto ProductsToProductsDto(Products products);
+    AddressesDto AddressesToAddressesDto(Addresses address);
     
-    Products ProductsDtoToProducts(ProductsDto products);
+    Addresses AddressesDtoToAddresses(AddressesDto address);
+    
+    List<AddressesDto> AddressesToAddressesDto(List<Addresses> address);
+    List<Addresses> AddressesDtoToAddresses(List<AddressesDto> address);
+    
 }

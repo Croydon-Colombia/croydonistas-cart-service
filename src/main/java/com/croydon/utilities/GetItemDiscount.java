@@ -11,18 +11,22 @@
  * El uso de este software implica la aceptación de los términos y condiciones establecidos.
  *
  */
-package com.croydon.service;
+package com.croydon.utilities;
 
-import com.croydon.model.dto.QuoteItemsDto;
-import com.croydon.model.dto.QuotesDto;
-import com.croydon.model.entity.Products;
+import com.croydon.model.dto.CustomersDto;
+import com.croydon.model.dto.ProductsDto;
 
 /**
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-public interface IAddQuoteItem {
-    
-    QuotesDto addNewQuoteItem(QuotesDto quotesDto, QuoteItemsDto quoteItemsDto, Products product);
-    
+public class GetItemDiscount {
+
+    public static double getPercentDiscount(CustomersDto customer, ProductsDto product) {
+        if (product.getCustomerDiscount() != null) {
+            return product.getCustomerDiscount();
+        }
+
+        return customer != null && customer.getDiscount() != null ? customer.getDiscount() : 0;
+    }
 }

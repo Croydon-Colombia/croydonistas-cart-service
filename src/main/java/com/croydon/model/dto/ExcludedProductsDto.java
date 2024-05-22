@@ -13,54 +13,21 @@
  */
 package com.croydon.model.dto;
 
-import java.math.BigInteger;
-import java.util.Collection;
+import java.io.Serializable;
 import java.util.Date;
 import lombok.Data;
 
 /**
  *
- * @author Edwin Torres - Email: edwin.torres@croydon.com.co
+ * @author Edwin Torres
  */
 @Data
-public class CustomersDto {
-    
+public class ExcludedProductsDto implements Serializable {
+
     public String id;
 
     public Date createdAt;
 
     public Date updatedAt;
-
-    public BigInteger billingAddressId;
-
-    public Boolean changedPassword;
-
-    public Double discount;
-
-    public String documentNumber;
-
-    public String email;
-
-    public Boolean employee;
-
-    public Boolean enabled;
-
-    public Boolean exempt;
-
-    public String firstName;
-
-    public String lastName;
-
-    public String middleName;
-
-    public String password;
-
-    public String phone;
-
-    public BigInteger shippingAddressId;
-
-    public String suffixName;
-
-    public Collection<AddressesDto> addressesCollection;
-
+    
 }

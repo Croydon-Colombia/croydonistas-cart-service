@@ -11,18 +11,22 @@
  * El uso de este software implica la aceptación de los términos y condiciones establecidos.
  *
  */
-package com.croydon.service;
+package com.croydon.mappers;
 
-import com.croydon.model.dto.QuoteItemsDto;
-import com.croydon.model.dto.QuotesDto;
-import com.croydon.model.entity.Products;
+import com.croydon.model.dto.CitiesDto;
+import com.croydon.model.entity.Cities;
+import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
 
 /**
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-public interface IAddQuoteItem {
+@Mapper(componentModel = "spring")
+public interface CitiesMapper {
+    CitiesMapper INSTANCE = Mappers.getMapper(CitiesMapper.class);
     
-    QuotesDto addNewQuoteItem(QuotesDto quotesDto, QuoteItemsDto quoteItemsDto, Products product);
+    CitiesDto CitiesToCitiesDto(Cities cities);
     
+    Cities CitiesDtoToCities(CitiesDto cities);
 }

@@ -45,11 +45,11 @@ public class DiscountTotalCalculatorImpl extends TotalCalculatorStrategy{
     }
 
     @Override
-    public QuoteTotalsDto calculateTotal(QuotesDto quote, QuoteTotalsDto quoteTotal, List<QuoteItemsDto> quoteItemList) {
+    public QuoteTotalsDto calculateTotal(QuotesDto quote, QuoteTotalsDto quoteTotal) {
         
         Date currentDate = DateUtils.getCurrentDate();
         
-        double discount = quoteItemList.stream().mapToDouble(QuoteItemsDto::getTotalDiscount).sum();
+        double discount = quote.getQuoteItemsCollection().stream().mapToDouble(QuoteItemsDto::getTotalDiscount).sum();
         quote.setDiscountAmount(-discount);
         quoteTotal.setValue(discount);
         quoteTotal.setUpdatedAt(currentDate);

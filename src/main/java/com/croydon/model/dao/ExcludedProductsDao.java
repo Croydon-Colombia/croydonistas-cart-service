@@ -11,17 +11,15 @@
  * El uso de este software implica la aceptación de los términos y condiciones establecidos.
  *
  */
-package com.croydon.service;
+package com.croydon.model.dao;
 
-import com.croydon.exceptions.ShippingAddressException;
-import com.croydon.model.dto.QuotesDto;
+import com.croydon.model.entity.ExcludedProducts;
+import org.springframework.data.repository.CrudRepository;
 
 /**
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-public interface CollectsQuoteTotals {
-    
-    QuotesDto quotesDto(QuotesDto quote) throws ShippingAddressException;
+public interface ExcludedProductsDao extends CrudRepository<ExcludedProducts, String>{
     
 }

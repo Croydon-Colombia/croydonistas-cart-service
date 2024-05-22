@@ -13,16 +13,15 @@
  */
 package com.croydon.service;
 
-import com.croydon.model.dto.QuoteItemsDto;
+import com.croydon.exceptions.ShippingAddressException;
 import com.croydon.model.dto.QuotesDto;
-import com.croydon.model.entity.Products;
 
 /**
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-public interface IAddQuoteItem {
+public interface ICollectsQuoteTotals {
     
-    QuotesDto addNewQuoteItem(QuotesDto quotesDto, QuoteItemsDto quoteItemsDto, Products product);
+    QuotesDto quotesDto(QuotesDto quote) throws ShippingAddressException;
     
 }

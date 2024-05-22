@@ -35,10 +35,13 @@ public interface ProductsToQuotesItemsMapper {
     @Mapping(target = "unidadPum", source = "unitPum")
     @Mapping(target = "name", source = "name")
     @Mapping(target = "thumbnail", source = "imagesCollection")
+    @Mapping(target = "taxPercent", source = "taxPercent")
     @Mapping(target = "basePrice", expression = "java(mapPrice(products))")
     @Mapping(target = "originalBasePrice", expression = "java(mapPrice(products))")
     @Mapping(target = "originalPercentDiscount", expression = "java(mapOriginalPercentDiscount(products))")
     QuoteItemsDto ProductsToQuoteItemsDto(Products products);
+    
+    
     
     default double mapOriginalPercentDiscount(Products product){
         if (product.getCustomerDiscount() != null) {

@@ -13,8 +13,6 @@
  */
 package com.croydon.model.dto;
 
-import java.math.BigInteger;
-import java.util.Collection;
 import java.util.Date;
 import lombok.Data;
 
@@ -23,44 +21,19 @@ import lombok.Data;
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
 @Data
-public class CustomersDto {
+public class RegionsDto {
     
-    public String id;
+    public Long id;
 
     public Date createdAt;
 
     public Date updatedAt;
 
-    public BigInteger billingAddressId;
+    public String code;
 
-    public Boolean changedPassword;
-
-    public Double discount;
-
-    public String documentNumber;
-
-    public String email;
-
-    public Boolean employee;
-
-    public Boolean enabled;
+    public String name;
 
     public Boolean exempt;
 
-    public String firstName;
-
-    public String lastName;
-
-    public String middleName;
-
-    public String password;
-
-    public String phone;
-
-    public BigInteger shippingAddressId;
-
-    public String suffixName;
-
-    public Collection<AddressesDto> addressesCollection;
-
+    public Boolean excluded;
 }

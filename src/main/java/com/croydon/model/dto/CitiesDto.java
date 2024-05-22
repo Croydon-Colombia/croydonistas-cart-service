@@ -35,5 +35,7 @@ public class CitiesDto {
 
     public double shippingValue;
 
-    public boolean excluded;
+    public Boolean excluded;
+    
+    public RegionsDto regionsId;
 }

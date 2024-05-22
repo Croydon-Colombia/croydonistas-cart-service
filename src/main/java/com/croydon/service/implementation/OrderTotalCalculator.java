@@ -43,8 +43,8 @@ public class OrderTotalCalculator extends TotalCalculatorStrategy{
     }
 
     @Override
-    public QuoteTotalsDto calculateTotal(QuotesDto quote, QuoteTotalsDto quoteTotal, List<QuoteItemsDto> quoteItemList) {
-        double total = quoteItemList.stream().mapToDouble(QuoteItemsDto::getTotalInclTax).sum();
+    public QuoteTotalsDto calculateTotal(QuotesDto quote, QuoteTotalsDto quoteTotal) {
+        double total = quote.getQuoteItemsCollection().stream().mapToDouble(QuoteItemsDto::getTotalInclTax).sum();
         quoteTotal.setValue(total);
         quote.setGrandTotal(quoteTotal.getValue());
         return quoteTotal;

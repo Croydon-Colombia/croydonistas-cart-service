@@ -13,16 +13,14 @@
  */
 package com.croydon.service;
 
-import com.croydon.model.dto.QuoteItemsDto;
-import com.croydon.model.dto.QuotesDto;
-import com.croydon.model.entity.Products;
+import com.croydon.model.entity.ExcludedProducts;
+import java.util.Optional;
 
 /**
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-public interface IAddQuoteItem {
+public interface IExcludedProducts {
     
-    QuotesDto addNewQuoteItem(QuotesDto quotesDto, QuoteItemsDto quoteItemsDto, Products product);
-    
+    Optional<ExcludedProducts> findBySku(String sku);
 }

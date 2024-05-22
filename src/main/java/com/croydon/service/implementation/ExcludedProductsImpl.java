@@ -11,18 +11,27 @@
  * El uso de este software implica la aceptación de los términos y condiciones establecidos.
  *
  */
-package com.croydon.service;
+package com.croydon.service.implementation;
 
-import com.croydon.model.dto.QuoteItemsDto;
-import com.croydon.model.dto.QuotesDto;
-import com.croydon.model.entity.Products;
+import com.croydon.model.dao.ExcludedProductsDao;
+import com.croydon.model.entity.ExcludedProducts;
+import com.croydon.service.IExcludedProducts;
+import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-public interface IAddQuoteItem {
+@Service
+public class ExcludedProductsImpl implements IExcludedProducts{
     
-    QuotesDto addNewQuoteItem(QuotesDto quotesDto, QuoteItemsDto quoteItemsDto, Products product);
-    
+    @Autowired
+    private ExcludedProductsDao excludedProducts;
+
+    @Override
+    public Optional<ExcludedProducts> findBySku(String sku) {
+        return excludedProducts.findById(sku);
+    }
 }

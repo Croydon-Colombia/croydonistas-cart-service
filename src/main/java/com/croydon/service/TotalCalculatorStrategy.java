@@ -46,7 +46,7 @@ public abstract class TotalCalculatorStrategy implements Comparable<TotalCalcula
 
     public abstract int position();
 
-    public abstract QuoteTotalsDto calculateTotal(QuotesDto quote, QuoteTotalsDto quoteTotal, List<QuoteItemsDto> quoteItemList) throws ShippingAddressException;
+    public abstract QuoteTotalsDto calculateTotal(QuotesDto quote, QuoteTotalsDto quoteTotal) throws ShippingAddressException;
 
     public QuoteTotalsDto calculateTotal(QuotesDto quote){
         Date currentDate = DateUtils.getCurrentDate();

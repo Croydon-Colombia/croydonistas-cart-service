@@ -44,8 +44,8 @@ public class OrderTaxCalculatorImpl extends TotalCalculatorStrategy {
     }
 
     @Override
-    public QuoteTotalsDto calculateTotal(QuotesDto quote, QuoteTotalsDto quoteTotal, List<QuoteItemsDto> quoteItemList) throws ShippingAddressException {
-        double total = quoteItemList
+    public QuoteTotalsDto calculateTotal(QuotesDto quote, QuoteTotalsDto quoteTotal) throws ShippingAddressException {
+        double total = quote.getQuoteItemsCollection()
                 .stream()
                 .mapToDouble(QuoteItemsDto::getTotalTaxAmount)
                 .sum();

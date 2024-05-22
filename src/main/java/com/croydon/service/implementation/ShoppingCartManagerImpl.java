@@ -15,8 +15,10 @@ package com.croydon.service.implementation;
 
 import com.croydon.exceptions.ProductException;
 import com.croydon.exceptions.ShippingAddressException;
+import com.croydon.mappers.ProductsMapper;
 import com.croydon.mappers.ProductsToQuotesItemsMapper;
 import com.croydon.mappers.QuotesMapper;
+import com.croydon.model.dto.ProductsDto;
 import com.croydon.model.dto.QuoteItemsDto;
 import com.croydon.model.dto.QuoteItemsPKDto;
 import com.croydon.model.dto.QuotesDto;
@@ -24,18 +26,20 @@ import com.croydon.model.dto.ShoppingCartItemDto;
 import com.croydon.model.entity.Customers;
 import com.croydon.model.entity.Products;
 import com.croydon.model.entity.Quotes;
-import com.croydon.service.CollectsQuoteTotals;
 import com.croydon.service.IAddQuoteItem;
 import com.croydon.service.ICustomers;
 import com.croydon.service.INewQuotes;
 import com.croydon.service.IProducts;
 import com.croydon.service.IQuotes;
 import com.croydon.service.IShoppingCartManager;
+import com.croydon.utilities.CalculatePercentDiscountProduct;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.croydon.service.ICollectsQuoteTotals;
+import com.croydon.utilities.GetItemDiscount;
 
 /**
  *
@@ -57,13 +61,16 @@ public class ShoppingCartManagerImpl implements IShoppingCartManager {
     private QuotesMapper quotesMapper;
 
     @Autowired
+    private ProductsMapper productsMapper;
+
+    @Autowired
     private ProductsToQuotesItemsMapper productsToQuotesItemsMapper;
 
     @Autowired
     private IProducts productsComponent;
 
     @Autowired
-    private CollectsQuoteTotals collectsQuoteTotalsService;
+    private ICollectsQuoteTotals collectsQuoteTotalsService;
 
     @Autowired
     private ICustomers customersService;
@@ -88,9 +95,9 @@ public class ShoppingCartManagerImpl implements IShoppingCartManager {
 
             QuoteItemsDto quoteItemsDto = productsToQuotesItemsMapper.ProductsToQuoteItemsDto(dbProduct);
             QuotesDto quotesDto = quotesMapper.quotesToQuotesDto(dbQuotes);
-            
+
             quoteItemsDto.setQuoteItemsPK(setQuoteItemsPKDto(quotesDto, dbProduct));
-            
+
             boolean itemExists = quotesDto.getQuoteItemsCollection().stream()
                     .anyMatch(item -> item.getQuoteItemsPK().equals(quoteItemsDto.getQuoteItemsPK()));
 
@@ -99,8 +106,11 @@ public class ShoppingCartManagerImpl implements IShoppingCartManager {
                 //NOTA: Implementar logica para actualizar articulo
             } else {
                 //El articulo NO existe en el carrito
-                QuotesDto updatedQuotesDto = IAddQuoteItemService.addNewQuoteItem(quotesDto, quoteItemsDto);
+                
+                quoteItemsDto.setQty(shoppingCartItemRequest.quantity);
+                QuotesDto updatedQuotesDto = IAddQuoteItemService.addNewQuoteItem(quotesDto, quoteItemsDto, dbProduct);
                 QuotesDto quoteDtoWithTotals = collectsQuoteTotalsService.quotesDto(updatedQuotesDto);
+
                 quotesService.save(quotesMapper.quotesDtoToQuotes(quoteDtoWithTotals));
                 quotesDto = quoteDtoWithTotals;
             }

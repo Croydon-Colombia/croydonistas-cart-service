@@ -15,11 +15,9 @@ package com.croydon.service.implementation;
 
 import com.croydon.exceptions.ShippingAddressException;
 import com.croydon.model.dto.AddressesDto;
-import com.croydon.model.dto.QuoteItemsDto;
 import com.croydon.model.dto.QuoteTotalsDto;
 import com.croydon.model.dto.QuotesDto;
 import com.croydon.service.TotalCalculatorStrategy;
-import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 
@@ -46,11 +44,11 @@ public class ShippingTotalsCalculatorImpl extends TotalCalculatorStrategy {
     }
 
     @Override
-    public QuoteTotalsDto calculateTotal(QuotesDto quote, QuoteTotalsDto quoteTotal, List<QuoteItemsDto> quoteItemList) throws ShippingAddressException {
+    public QuoteTotalsDto calculateTotal(QuotesDto quote, QuoteTotalsDto quoteTotal) throws ShippingAddressException {
 
         Optional<AddressesDto> shippingAddressOptional = quote.getCustomersId().getAddressesCollection()
                 .stream()
-                .filter(address -> address.getId().equals(quote.getCustomersId().getShippingAddressId()))
+                .filter(address -> address.getShipping().equals(true))
                 .findFirst();
 
         AddressesDto shippingAddress = shippingAddressOptional.orElseThrow(()

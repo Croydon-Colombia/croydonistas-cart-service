@@ -13,12 +13,17 @@
  */
 package com.croydon.service.implementation;
 
+import com.croydon.model.dto.AddressesDto;
 import com.croydon.model.dto.QuoteItemsDto;
 import com.croydon.model.dto.QuoteItemsPKDto;
 import com.croydon.model.dto.QuotesDto;
+import com.croydon.model.entity.Products;
 import com.croydon.service.IAddQuoteItem;
+import com.croydon.service.IQuoteItemsTaxesCalculator;
 import com.croydon.utilities.DateUtils;
 import java.util.Date;
+import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -28,27 +33,38 @@ import org.springframework.stereotype.Service;
 @Service
 public class AddQuoteItemImpl implements IAddQuoteItem {
 
+    @Autowired
+    private IQuoteItemsTaxesCalculator quoteItemsTaxesCalculator;
+
     @Override
-    public QuotesDto addNewQuoteItem(QuotesDto quotesDto, QuoteItemsDto quoteItemsDto) {
-        
+    public QuotesDto addNewQuoteItem(QuotesDto quotesDto, QuoteItemsDto quoteItemsDto, Products product) {
+
         Date currentDate = DateUtils.getCurrentDate();
         QuoteItemsPKDto quoteItemsPKDto = new QuoteItemsPKDto();
         quoteItemsPKDto.setCustomersId(quotesDto.getCustomersId().getId());
         quoteItemsPKDto.setQuotesId(quotesDto.getId());
         quoteItemsPKDto.setSku(quoteItemsDto.getQuoteItemsPK().getSku());
-        
+
         quoteItemsDto.setLineNumber(quotesDto.getLineNumber());
         quoteItemsDto.setTaxCode(quoteItemsDto.getTaxPercent() + "%");
         quoteItemsDto.setQuoteItemsPK(quoteItemsPKDto);
         quoteItemsDto.setCreatedAt(currentDate);
         quoteItemsDto.setUpdatedAt(currentDate);
 
-        quotesDto.getQuoteItemsCollection().add(quoteItemsDto);
+        Optional<AddressesDto> shippingAddressOptional = quotesDto.getCustomersId().getAddressesCollection()
+                .stream()
+                .filter(address -> address.getShipping().equals(true))
+                .findFirst(); 
         
+        QuoteItemsDto quoteWithTaxes 
+                = quoteItemsTaxesCalculator.calculateItemTotals(quotesDto, quoteItemsDto, shippingAddressOptional.get(), product);
+        
+        quotesDto.getQuoteItemsCollection().add(quoteWithTaxes);
+
         int lineNumber = quotesDto.getLineNumber();
-        lineNumber++;        
+        lineNumber++;
         quotesDto.setLineNumber(lineNumber);
-        
+
         return quotesDto;
     }
 }

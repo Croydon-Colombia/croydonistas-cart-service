@@ -16,7 +16,6 @@ package com.croydon.service.implementation;
 import com.croydon.exceptions.ShippingAddressException;
 import com.croydon.model.dto.QuoteTotalsDto;
 import com.croydon.model.dto.QuotesDto;
-import com.croydon.service.CollectsQuoteTotals;
 import com.croydon.service.TotalCalculatorStrategy;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -25,13 +24,14 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
+import com.croydon.service.ICollectsQuoteTotals;
 
 /**
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
 @Service
-public class CollectsQuoteTotalsCalculatorImpl implements CollectsQuoteTotals {
+public class CollectsQuoteTotalsCalculatorImpl implements ICollectsQuoteTotals {
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -44,18 +44,24 @@ public class CollectsQuoteTotalsCalculatorImpl implements CollectsQuoteTotals {
 
         totals.sort(Comparator.comparingInt(TotalCalculatorStrategy::position));
 
-        List<QuoteTotalsDto> quoteTotalList = totals.stream()
-                .map(collectTotal -> {
-                    QuoteTotalsDto quoteTotal = collectTotal.calculateTotal(quote);
-                    quoteTotal.setPosition(collectTotal.position());
-                    return quoteTotal;
-                })
-                .collect(Collectors.toList());
+        List<QuoteTotalsDto> quoteTotalList = new ArrayList<>();
+
+        totals.forEach(
+                action -> {
+                    try {
+                        QuoteTotalsDto result = action.calculateTotal(quote);
+                        result.setPosition(action.position());
+                        QuoteTotalsDto collectedTotal = action.calculateTotal(quote, result);
+                        quoteTotalList.add(collectedTotal);
+                    } catch (ShippingAddressException e) {
+                        int lel = 19;
+                    }
+                });
 
         quote.setQuoteTotalsCollection(quoteTotalList);
-        
+
         return quote;
-        
+
     }
 
 }

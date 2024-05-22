@@ -13,7 +13,6 @@
  */
 package com.croydon.model.dto;
 
-import com.croydon.model.entity.*;
 import java.util.Date;
 import lombok.Data;
 
@@ -32,7 +31,7 @@ public class AddressesDto {
 
     public String address;
 
-    public boolean billing;
+    public Boolean billing;
 
     public String email;
 
@@ -46,7 +45,7 @@ public class AddressesDto {
 
     public String shan;
 
-    public boolean shipping;
+    public Boolean shipping;
 
     public String suffixName;
 

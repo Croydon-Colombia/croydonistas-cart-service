@@ -53,15 +53,15 @@ public class ProductsDto {
 
     public Double employeeDiscount;
 
-    public boolean enabled;
+    public Boolean enabled;
 
-    public boolean enabledIncentive;
+    public Boolean enabledIncentive;
 
     public Boolean incentive;
 
     public Double levelIncentive;
 
-    public boolean loadedImages;
+    public Boolean loadedImages;
 
     public String parentProduct;
 
@@ -71,7 +71,7 @@ public class ProductsDto {
 
     public int productType;
 
-    public boolean requireIndex;
+    public Boolean requireIndex;
 
     public String searchTerms;
     
@@ -87,19 +87,19 @@ public class ProductsDto {
 
     public String visibility;
 
-    public boolean excluded;
+    public Boolean excluded;
 
-    public Collection<CategoriesDto> categoriesCollection;
+    //public Collection<CategoriesDto> categoriesCollection;
 
-    public Collection<ProductIndicesDto> productIndicesCollection;
+    //public Collection<ProductIndicesDto> productIndicesCollection;
 
     public Collection<ImagesDto> imagesCollection;
 
-    public Collection<ProductAttributesDto> productAttributesCollection;
+    //public Collection<ProductAttributesDto> productAttributesCollection;
 
     public Collection<PricesDto> pricesCollection;
 
-    public Collection<ConfigurableProductOptionsDto> configurableProductOptionsCollection;
+    //public Collection<ConfigurableProductOptionsDto> configurableProductOptionsCollection;
 
-    public Collection<ConfigurableProductLinksDto> configurableProductLinksCollection;
+    //public Collection<ConfigurableProductLinksDto> configurableProductLinksCollection;
 }
