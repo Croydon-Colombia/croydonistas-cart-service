@@ -11,24 +11,16 @@
  * El uso de este software implica la aceptación de los términos y condiciones establecidos.
  *
  */
-package com.croydon.configuration;
+package com.croydon.Infrastructure;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.reactive.function.client.WebClient;
+import com.croydon.Infrastructure.dto.StockResponse;
+import reactor.core.publisher.Mono;
 
 /**
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-@Configuration
-public class AppConfig {
-    
-    @Bean
-    public WebClient webClient() {
-        return WebClient.builder()
-                        .baseUrl("https://apirest.croydonjde.com.co/ords/api/online/stock")
-                        .defaultHeader("Authorization", "Basic Q1JPWURPTlJFU1Q6Q3IweWQwblczYlIzNXQ=")
-                        .build();
-    }
+public interface IStockClient {
+
+    Mono<StockResponse> getStock(String productId, String locationCode);
 }

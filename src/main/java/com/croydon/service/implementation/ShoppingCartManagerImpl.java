@@ -13,12 +13,12 @@
  */
 package com.croydon.service.implementation;
 
+import com.croydon.Infrastructure.IStockClient;
+import com.croydon.Infrastructure.dto.StockResponse;
 import com.croydon.exceptions.ProductException;
 import com.croydon.exceptions.ShippingAddressException;
-import com.croydon.mappers.ProductsMapper;
 import com.croydon.mappers.ProductsToQuotesItemsMapper;
 import com.croydon.mappers.QuotesMapper;
-import com.croydon.model.dto.ProductsDto;
 import com.croydon.model.dto.QuoteItemsDto;
 import com.croydon.model.dto.QuoteItemsPKDto;
 import com.croydon.model.dto.QuotesDto;
@@ -32,14 +32,13 @@ import com.croydon.service.INewQuotes;
 import com.croydon.service.IProducts;
 import com.croydon.service.IQuotes;
 import com.croydon.service.IShoppingCartManager;
-import com.croydon.utilities.CalculatePercentDiscountProduct;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.croydon.service.ICollectsQuoteTotals;
-import com.croydon.utilities.GetItemDiscount;
+import reactor.core.publisher.Mono;
 
 /**
  *
@@ -61,9 +60,6 @@ public class ShoppingCartManagerImpl implements IShoppingCartManager {
     private QuotesMapper quotesMapper;
 
     @Autowired
-    private ProductsMapper productsMapper;
-
-    @Autowired
     private ProductsToQuotesItemsMapper productsToQuotesItemsMapper;
 
     @Autowired
@@ -74,6 +70,9 @@ public class ShoppingCartManagerImpl implements IShoppingCartManager {
 
     @Autowired
     private ICustomers customersService;
+    
+    @Autowired
+    private IStockClient stockClient;
 
     @Override
     public QuotesDto getOrCreateCart(String customerId) {
@@ -90,6 +89,10 @@ public class ShoppingCartManagerImpl implements IShoppingCartManager {
         try {
             //NOTA: Antes de hacer operaciones se debe validar inventario disponnible en JDE
 
+            StockResponse stockResponse = stockClient.getStock(shoppingCartItemRequest.productSku, "CP001").block();
+            if(stockResponse.qty < shoppingCartItemRequest.quantity)
+                throw new ProductException("Cantidad solicitada no disponible");
+                                
             Products dbProduct = productsComponent.findProductById(shoppingCartItemRequest.productSku);
             Quotes dbQuotes = quotesService.findByQuotesId(shoppingCartItemRequest.quotes_id);
 
@@ -115,17 +118,7 @@ public class ShoppingCartManagerImpl implements IShoppingCartManager {
                 quotesDto = quoteDtoWithTotals;
             }
             return quotesDto;
-            /*
-            X   Consultar Inventario en JDE
-            X   Consultas a base de datos Quotes y QuotesItems
-            X   Mapear de Entity a Dto
-                Logica para item ya existe
-            X   Logica para item no existe
-            X   Continuar Calcular totales...
-            X   Guardar en base de datos
-                Retornar Quotes ya procesado
-             */
-
+            
         } catch (ProductException ex) {
             Logger.getLogger(ShoppingCartManagerImpl.class.getName()).log(Level.SEVERE, null, ex);
             return null; //-> cambiar esto por una custom exception 'CrudProductException'
