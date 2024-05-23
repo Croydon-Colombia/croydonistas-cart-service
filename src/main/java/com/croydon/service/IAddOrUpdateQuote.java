@@ -11,19 +11,18 @@
  * El uso de este software implica la aceptación de los términos y condiciones establecidos.
  *
  */
-package com.croydon.utilities;
+package com.croydon.service;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import com.croydon.exceptions.ProductException;
+import com.croydon.exceptions.ShippingAddressException;
+import com.croydon.model.dto.QuotesDto;
+import com.croydon.model.dto.ShoppingCartItemDto;
 
 /**
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-@Data
-@AllArgsConstructor
-public class ApiResponse<T> {
-    private T data;
-    private String message;
-    private String exception;
+public interface IAddOrUpdateQuote {
+
+    QuotesDto addOrUpdateCartProduct(ShoppingCartItemDto shoppingCartItemRequest) throws ShippingAddressException, ProductException;
 }

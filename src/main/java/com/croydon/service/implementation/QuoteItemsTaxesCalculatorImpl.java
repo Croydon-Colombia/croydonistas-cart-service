@@ -102,6 +102,7 @@ public class QuoteItemsTaxesCalculatorImpl implements IQuoteItemsTaxesCalculator
         quoteItem.setTotalDiscount(quoteItem.getDiscountPrice() * quoteItem.getQty());
         quoteItem.setTotalInclTax(quoteItem.getPriceInclTax() * quoteItem.getQty());
         quoteItem.setTotalTaxAmount(quoteItem.getTaxAmount() * quoteItem.getQty());
+        quoteItem.setTotalOriginalBasePrice(quoteItem.getOriginalBasePrice() * quoteItem.getQty());
         return quoteItem;
     }
 }

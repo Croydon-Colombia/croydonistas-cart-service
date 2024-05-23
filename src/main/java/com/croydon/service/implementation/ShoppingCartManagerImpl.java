@@ -13,32 +13,24 @@
  */
 package com.croydon.service.implementation;
 
-import com.croydon.Infrastructure.IStockClient;
-import com.croydon.Infrastructure.dto.StockResponse;
 import com.croydon.exceptions.ProductException;
 import com.croydon.exceptions.ShippingAddressException;
-import com.croydon.mappers.ProductsToQuotesItemsMapper;
 import com.croydon.mappers.QuotesMapper;
-import com.croydon.model.dto.QuoteItemsDto;
-import com.croydon.model.dto.QuoteItemsPKDto;
 import com.croydon.model.dto.QuotesDto;
 import com.croydon.model.dto.ShoppingCartItemDto;
 import com.croydon.model.entity.Customers;
-import com.croydon.model.entity.Products;
 import com.croydon.model.entity.Quotes;
-import com.croydon.service.IAddQuoteItem;
+import com.croydon.service.IAddOrUpdateQuote;
+import com.croydon.service.ICollectsQuoteTotals;
 import com.croydon.service.ICustomers;
 import com.croydon.service.INewQuotes;
-import com.croydon.service.IProducts;
 import com.croydon.service.IQuotes;
 import com.croydon.service.IShoppingCartManager;
+import com.croydon.utilities.DateUtils;
+import java.util.Date;
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.croydon.service.ICollectsQuoteTotals;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -54,88 +46,56 @@ public class ShoppingCartManagerImpl implements IShoppingCartManager {
     private INewQuotes newQuotesService;
 
     @Autowired
-    private IAddQuoteItem IAddQuoteItemService;
-
-    @Autowired
     private QuotesMapper quotesMapper;
 
     @Autowired
-    private ProductsToQuotesItemsMapper productsToQuotesItemsMapper;
+    private ICustomers customersService;
 
     @Autowired
-    private IProducts productsComponent;
+    private IAddOrUpdateQuote addOrUpdateQuoteService;
 
     @Autowired
     private ICollectsQuoteTotals collectsQuoteTotalsService;
 
-    @Autowired
-    private ICustomers customersService;
-    
-    @Autowired
-    private IStockClient stockClient;
-
     @Override
     public QuotesDto getOrCreateCart(String customerId) {
+
         Optional<Customers> customer = customersService.findById(customerId);
+        if (!customer.isPresent()) {
+            throw new IllegalArgumentException("Customer not found");
+        }
+
         Quotes quote = quotesService.findByCustomersId(customer.get());
-        Quotes quotesResponse = (quote == null) ? newQuotesService.makeNewQuotes(customerId) : quote;
-        quotesService.save(quotesResponse);
-        return quotesMapper.quotesToQuotesDto(quotesResponse);
+        if (quote == null) {
+            quote = newQuotesService.makeNewQuotes(customerId);
+        }
+
+        quotesService.save(quote);
+        return quotesMapper.quotesToQuotesDto(quote);
 
     }
 
     @Override
-    public QuotesDto addOrUpdateCartProduct(ShoppingCartItemDto shoppingCartItemRequest) {
-        try {
-            //NOTA: Antes de hacer operaciones se debe validar inventario disponnible en JDE
-
-            StockResponse stockResponse = stockClient.getStock(shoppingCartItemRequest.productSku, "CP001").block();
-            if(stockResponse.qty < shoppingCartItemRequest.quantity)
-                throw new ProductException("Cantidad solicitada no disponible");
-                                
-            Products dbProduct = productsComponent.findProductById(shoppingCartItemRequest.productSku);
-            Quotes dbQuotes = quotesService.findByQuotesId(shoppingCartItemRequest.quotes_id);
-
-            QuoteItemsDto quoteItemsDto = productsToQuotesItemsMapper.ProductsToQuoteItemsDto(dbProduct);
-            QuotesDto quotesDto = quotesMapper.quotesToQuotesDto(dbQuotes);
-
-            quoteItemsDto.setQuoteItemsPK(setQuoteItemsPKDto(quotesDto, dbProduct));
-
-            boolean itemExists = quotesDto.getQuoteItemsCollection().stream()
-                    .anyMatch(item -> item.getQuoteItemsPK().equals(quoteItemsDto.getQuoteItemsPK()));
-
-            if (itemExists) {
-                //El articulo YA existe en el carrito
-                //NOTA: Implementar logica para actualizar articulo
-            } else {
-                //El articulo NO existe en el carrito
-                
-                quoteItemsDto.setQty(shoppingCartItemRequest.quantity);
-                QuotesDto updatedQuotesDto = IAddQuoteItemService.addNewQuoteItem(quotesDto, quoteItemsDto, dbProduct);
-                QuotesDto quoteDtoWithTotals = collectsQuoteTotalsService.quotesDto(updatedQuotesDto);
-
-                quotesService.save(quotesMapper.quotesDtoToQuotes(quoteDtoWithTotals));
-                quotesDto = quoteDtoWithTotals;
-            }
-            return quotesDto;
-            
-        } catch (ProductException ex) {
-            Logger.getLogger(ShoppingCartManagerImpl.class.getName()).log(Level.SEVERE, null, ex);
-            return null; //-> cambiar esto por una custom exception 'CrudProductException'
-        } catch (ShippingAddressException ex) {
-            Logger.getLogger(ShoppingCartManagerImpl.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
-        }
+    public QuotesDto addOrUpdateCartProduct(ShoppingCartItemDto shoppingCartItemRequest) throws ShippingAddressException, ProductException {
+        return addOrUpdateQuoteService.addOrUpdateCartProduct(shoppingCartItemRequest);
     }
 
-    private QuoteItemsPKDto setQuoteItemsPKDto(QuotesDto quotesDto, Products dbProduct) {
-        QuoteItemsPKDto quoteItemsPKDto = new QuoteItemsPKDto();
+    @Override
+    public QuotesDto deleteCartProduct(ShoppingCartItemDto shoppingCartItemRequest) throws ShippingAddressException {
+        Date currentDateTime = DateUtils.getCurrentDate();
 
-        quoteItemsPKDto.setCustomersId(quotesDto.getCustomersId().getId());
-        quoteItemsPKDto.setQuotesId(quotesDto.getId());
-        quoteItemsPKDto.setSku(dbProduct.getId());
+        Quotes dbQuotes = quotesService.findByQuotesId(shoppingCartItemRequest.quotes_id);
+        QuotesDto quotesDto = quotesMapper.quotesToQuotesDto(dbQuotes);
 
-        return quoteItemsPKDto;
+        quotesDto.getQuoteItemsCollection()
+                .removeIf(item -> item.getQuoteItemsPK().getSku()
+                .equals(shoppingCartItemRequest.getProductSku()));
+
+        QuotesDto quoteDtoWithTotals = collectsQuoteTotalsService.quotesDto(quotesDto);
+        quoteDtoWithTotals.setUpdatedAt(currentDateTime);
+        
+        quotesService.save(quotesMapper.quotesDtoToQuotes(quoteDtoWithTotals));
+        
+        return quoteDtoWithTotals;
     }
-
 }

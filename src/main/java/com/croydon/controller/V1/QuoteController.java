@@ -13,12 +13,15 @@
  */
 package com.croydon.controller.V1;
 
+import com.croydon.exceptions.ProductException;
+import com.croydon.exceptions.ShippingAddressException;
 import com.croydon.model.dto.QuotesDto;
 import com.croydon.model.dto.ShoppingCartItemDto;
 import com.croydon.service.IShoppingCartManager;
 import com.croydon.utilities.ApiResponse;
 import jakarta.validation.Valid;
 import org.hibernate.exception.DataException;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +42,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/shopping-cart/v1")
 public class QuoteController {
     
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(QuoteController.class);
+    
     @Autowired
     private IShoppingCartManager shoppingCartManagerService;
     
@@ -49,10 +54,10 @@ public class QuoteController {
     public ResponseEntity<ApiResponse<QuotesDto>> findQuotesByClientId(@PathVariable("customerId") String customerId){
         try {
             QuotesDto response = shoppingCartManagerService.getOrCreateCart(customerId);
-            return ResponseEntity.ok(new ApiResponse<>(response, "Success"));
+            return ResponseEntity.ok(new ApiResponse<>(response, "Success", null));
         } catch (DataException ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ApiResponse<>(null, ex.getMessage()));
+                .body(new ApiResponse<>(null, ex.getMessage(), null));
         }         
         
     }
@@ -63,18 +68,28 @@ public class QuoteController {
     @PostMapping("quotes/delete")
     public ResponseEntity<ApiResponse<QuotesDto>> deleteQuote (@RequestParam("quotesId") String quotesId){
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ApiResponse<>(null, "Not implemented!"));
+                .body(new ApiResponse<>(null, "Not implemented!", null));
     }
     
     @PostMapping("products/add-or-update")
     public ResponseEntity<ApiResponse<QuotesDto>> addProduct(@Valid @RequestBody ShoppingCartItemDto itemsRequest){
-        QuotesDto response = shoppingCartManagerService.addOrUpdateCartProduct(itemsRequest);
-        return ResponseEntity.ok(new ApiResponse<>(response, "Success"));
+        try {
+            QuotesDto response = shoppingCartManagerService.addOrUpdateCartProduct(itemsRequest);
+            return ResponseEntity.ok(new ApiResponse<>(response, "Success", null));
+        } catch (ProductException | ShippingAddressException ex) {
+            logger.error(ex.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>(null, "Failed", ex.getMessage()));
+        }
     }
     
     @PostMapping("products/delete")
-    public ResponseEntity<ApiResponse<QuotesDto>> deleteProduct(@RequestParam("productSku") String productSku){
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ApiResponse<>(null, "Not implemented!"));
+    public ResponseEntity<ApiResponse<QuotesDto>> deleteProduct(@Valid @RequestBody ShoppingCartItemDto itemsRequest){
+        try {
+            QuotesDto response = shoppingCartManagerService.deleteCartProduct(itemsRequest);
+            return ResponseEntity.ok(new ApiResponse<>(response, "Success", null));
+        } catch (ShippingAddressException ex) {
+            logger.error(ex.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>(null, "Failed", ex.getMessage()));
+        }
     }
 }

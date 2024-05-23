@@ -39,17 +39,14 @@ public class AddQuoteItemImpl implements IAddQuoteItem {
     @Override
     public QuotesDto addNewQuoteItem(QuotesDto quotesDto, QuoteItemsDto quoteItemsDto, Products product) {
 
-        Date currentDate = DateUtils.getCurrentDate();
         QuoteItemsPKDto quoteItemsPKDto = new QuoteItemsPKDto();
         quoteItemsPKDto.setCustomersId(quotesDto.getCustomersId().getId());
         quoteItemsPKDto.setQuotesId(quotesDto.getId());
         quoteItemsPKDto.setSku(quoteItemsDto.getQuoteItemsPK().getSku());
 
-        quoteItemsDto.setLineNumber(quotesDto.getLineNumber());
+        quoteItemsDto.setAdded(true);        
         quoteItemsDto.setTaxCode(quoteItemsDto.getTaxPercent() + "%");
         quoteItemsDto.setQuoteItemsPK(quoteItemsPKDto);
-        quoteItemsDto.setCreatedAt(currentDate);
-        quoteItemsDto.setUpdatedAt(currentDate);
 
         Optional<AddressesDto> shippingAddressOptional = quotesDto.getCustomersId().getAddressesCollection()
                 .stream()
@@ -60,10 +57,6 @@ public class AddQuoteItemImpl implements IAddQuoteItem {
                 = quoteItemsTaxesCalculator.calculateItemTotals(quotesDto, quoteItemsDto, shippingAddressOptional.get(), product);
         
         quotesDto.getQuoteItemsCollection().add(quoteWithTaxes);
-
-        int lineNumber = quotesDto.getLineNumber();
-        lineNumber++;
-        quotesDto.setLineNumber(lineNumber);
 
         return quotesDto;
     }

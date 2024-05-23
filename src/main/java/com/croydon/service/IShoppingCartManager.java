@@ -13,6 +13,8 @@
  */
 package com.croydon.service;
 
+import com.croydon.exceptions.ProductException;
+import com.croydon.exceptions.ShippingAddressException;
 import com.croydon.model.dto.QuotesDto;
 import com.croydon.model.dto.ShoppingCartItemDto;
 
@@ -23,6 +25,7 @@ import com.croydon.model.dto.ShoppingCartItemDto;
 public interface IShoppingCartManager {
     
     QuotesDto getOrCreateCart(String customerId);
+    QuotesDto addOrUpdateCartProduct(ShoppingCartItemDto shoppingCartItemRequest) throws ShippingAddressException, ProductException;
+    QuotesDto deleteCartProduct(ShoppingCartItemDto shoppingCartItemRequest) throws ShippingAddressException;
     
-    QuotesDto addOrUpdateCartProduct(ShoppingCartItemDto shoppingCartItemRequest);
 }
