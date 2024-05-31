@@ -43,31 +43,31 @@ import lombok.ToString;
 public class QuoteTotals {
     
     @EmbeddedId
-    protected QuoteTotalsPK quoteTotalsPK;
+    public QuoteTotalsPK quoteTotalsPK;
 
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date createdAt;
+    public Date createdAt;
 
     @Column(name = "updated_at")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedAt;
+    public Date updatedAt;
 
     @Basic(optional = false)
     @Column(name = "label")
-    private String label;
+    public String label;
 
     @Basic(optional = false)
     @Column(name = "position")
-    private int position;
+    public int position;
 
     @Basic(optional = false)
     @Column(name = "value")
-    private double value;
+    public double value;
 
     @JoinColumn(name = "quotes_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     @JsonIgnore
-    private Quotes quotes;
+    public Quotes quotes;
     
 }

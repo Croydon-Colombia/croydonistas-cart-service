@@ -43,46 +43,46 @@ import lombok.ToString;
 public class QuoteIncentiveItems {
     
     @EmbeddedId
-    protected QuoteIncentiveItemsPK quoteIncentiveItemsPK;
+    public QuoteIncentiveItemsPK quoteIncentiveItemsPK;
 
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date createdAt;
+    public Date createdAt;
 
     @Column(name = "updated_at")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedAt;
+    public Date updatedAt;
 
     @Basic(optional = false)
     @Column(name = "added")
-    private boolean added;
+    public boolean added;
 
     @Basic(optional = false)
     @Column(name = "incentives")
-    private double incentives;
+    public double incentives;
 
     @Basic(optional = false)
     @Column(name = "line_number")
-    private int lineNumber;
+    public int lineNumber;
 
     @Basic(optional = false)
     @Column(name = "name")
-    private String name;
+    public String name;
 
     @Basic(optional = false)
     @Column(name = "qty")
-    private int qty;
+    public int qty;
 
     @Column(name = "thumbnail")
-    private String thumbnail;
+    public String thumbnail;
 
     @Basic(optional = false)
     @Column(name = "total")
-    private double total;
+    public double total;
 
     @JoinColumn(name = "quotes_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     @JsonIgnore
-    private Quotes quotes;
+    public Quotes quotes;
 
 }

@@ -13,40 +13,58 @@
  */
 package com.croydon.service.implementation;
 
+import com.croydon.model.entity.Customers;
 import com.croydon.model.entity.Quotes;
 import com.croydon.service.INewQuotes;
 import com.croydon.service.IPurchaseOrderIncrementId;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import com.croydon.utilities.DateUtils;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
+ * Servicio para crear nuevos carritos de compras.
  *
- * @author Edwin Torres - Email: edwin.torres@croydon.com.co
+ * Esta clase implementa la interfaz INewQuotes y proporciona métodos para crear
+ * nuevos carritos de compras.
+ *
+ * @autor Edwin Torres - Email: edwin.torres@croydon.com.co
  */
 @Service
 public class NewQuotesImpl implements INewQuotes {
-    
+
     @Autowired
     private IPurchaseOrderIncrementId purchaseOrderIncrementIdService;
+    @Autowired
+    private CustomersImpl CustomersService;
 
+    /**
+     * Crea un nuevo carrito de compras para un cliente.
+     *
+     * @param customerId el ID del cliente para el que se va a crear el carrito
+     * de compras.
+     * @return el carrito de compras recién creado.
+     */
     @Override
     public Quotes makeNewQuotes(String customerId) {
-        
+
         Quotes quote = new Quotes();
-        
+        Date currentDate = DateUtils.getCurrentDate();
+
         String purchaseOrderIncrement = purchaseOrderIncrementIdService.getNextPurchaseOrderId();
-        LocalDateTime localDateTime = LocalDateTime.now();
-        Date date = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
-        
+
         quote.setIncrementId(purchaseOrderIncrement);
-        quote.setCustomersId(customerId);
+
+        Customers customer = CustomersService.findById(customerId).get();
+
+        quote.setDiscountAmount(customer.getDiscount());
+        quote.setCustomersId(customer);
         quote.setAvailable(true);
-        quote.setCreatedAt(date);
-        quote.setUpdatedAt(date);
+        quote.setCreatedAt(currentDate);
+        quote.setUpdatedAt(currentDate);
+        quote.setLineNumber(1);
+
         return quote;
     }
-    
+
 }

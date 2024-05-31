@@ -20,6 +20,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
@@ -48,144 +50,143 @@ public class Quotes {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "id")
-    private Long id;
+    public Long id;
 
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date createdAt;
+    public Date createdAt;
 
     @Column(name = "updated_at")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedAt;
+    public Date updatedAt;
 
     @Column(name = "available_credit_limit")
-    private Double availableCreditLimit;
+    public Double availableCreditLimit;
 
     @Column(name = "available_incentives")
-    private Double availableIncentives;
+    public Double availableIncentives;
 
     @Column(name = "discount_amount")
-    private Double discountAmount;
+    public Double discountAmount;
 
     @Column(name = "discount_code")
-    private String discountCode;
+    public String discountCode;
 
     @Column(name = "discount_percent")
-    private Double discountPercent;
+    public Double discountPercent;
 
     @Column(name = "document_company")
-    private String documentCompany;
+    public String documentCompany;
 
     @Column(name = "document_number")
-    private String documentNumber;
+    public String documentNumber;
 
     @Column(name = "document_type_code")
-    private String documentTypeCode;
+    public String documentTypeCode;
 
     @Column(name = "employee_limit_used")
-    private Double employeeLimitUsed;
+    public Double employeeLimitUsed;
 
     @Column(name = "employee_quote_limit")
-    private Double employeeQuoteLimit;
+    public Double employeeQuoteLimit;
 
     @Basic(optional = false)
     @Column(name = "grand_total")
-    private double grandTotal;
+    public double grandTotal;
 
     @Column(name = "has_incentives")
-    private Boolean hasIncentives;
+    public Boolean hasIncentives;
 
     @Basic(optional = false)
     @Column(name = "incentives")
-    private boolean incentives;
+    public boolean incentives;
 
     @Basic(optional = false)
     @Column(name = "increment_id")
-    private String incrementId;
+    public String incrementId;
 
     @Column(name = "ip")
-    private String ip;
+    public String ip;
 
     @Basic(optional = false)
     @Column(name = "line_number")
-    private int lineNumber;
+    public int lineNumber;
 
     @Column(name = "requested_incentives")
-    private Double requestedIncentives;
+    public Double requestedIncentives;
 
     @Column(name = "required_credit_limit")
-    private Double requiredCreditLimit;
+    public Double requiredCreditLimit;
 
     @Column(name = "sale")
-    private Boolean sale;
+    public Boolean sale;
 
     @Basic(optional = false)
     @Column(name = "shipping_amount_base")
-    private double shippingAmountBase;
+    public double shippingAmountBase;
 
     @Basic(optional = false)
     @Column(name = "shipping_incl_tax")
-    private double shippingInclTax;
+    public double shippingInclTax;
 
     @Basic(optional = false)
     @Column(name = "shipping_tax_amount")
-    private double shippingTaxAmount;
+    public double shippingTaxAmount;
 
     @Basic(optional = false)
     @Column(name = "shipping_value")
-    private double shippingValue;
+    public double shippingValue;
 
     @Basic(optional = false)
     @Column(name = "subtotal")
-    private double subtotal;
+    public double subtotal;
 
     @Basic(optional = false)
     @Column(name = "tax_amount")
-    private double taxAmount;
+    public double taxAmount;
 
     @Basic(optional = false)
     @Column(name = "total_base")
-    private double totalBase;
+    public double totalBase;
 
     @Basic(optional = false)
     @Column(name = "total_incl_tax")
-    private double totalInclTax;
+    public double totalInclTax;
 
     @Column(name = "user_agent")
-    private String userAgent;
+    public String userAgent;
 
     @Basic(optional = false)
     @Column(name = "available")
-    private boolean available;
+    public boolean available;
 
     @Column(name = "total_qty")
-    private Integer totalQty;
+    public Integer totalQty;
 
     @Column(name = "total_qty_incentives")
-    private Integer totalQtyIncentives;
+    public Integer totalQtyIncentives;
 
     @Column(name = "cancelled_at")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date cancelledAt;
+    public Date cancelledAt;
 
     @Column(name = "employee_limit_pending")
-    private Double employeeLimitPending;
+    public Double employeeLimitPending;
 
     @Column(name = "shipping_line_number")
-    private Integer shippingLineNumber;
+    public Integer shippingLineNumber;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "quotes")
-    private Collection<QuoteTotals> quoteTotalsCollection;
+    public Collection<QuoteTotals> quoteTotalsCollection;
 
-    //@JoinColumn(name = "customers_id", referencedColumnName = "id")
-    //@ManyToOne(optional = false)
-    @Column(name = "customers_id")
-    private String customersId;
-
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "quotes")
-    private Collection<QuoteItems> quoteItemsCollection;
+    @JoinColumn(name = "customers_id", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private Customers customersId;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "quotes")
-    private Collection<QuoteIncentiveItems> quoteIncentiveItemsCollection;
+    public Collection<QuoteItems> quoteItemsCollection;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "quotes")
+    public Collection<QuoteIncentiveItems> quoteIncentiveItemsCollection;
 
 }

@@ -43,101 +43,101 @@ import lombok.ToString;
 public class EmployeeLineItems {
     
     @EmbeddedId
-    protected EmployeeLineItemsPK employeeLineItemsPK;
+    public EmployeeLineItemsPK employeeLineItemsPK;
 
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date createdAt;
+    public Date createdAt;
 
     @Column(name = "updated_at")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedAt;
+    public Date updatedAt;
 
     @Basic(optional = false)
     @Column(name = "added")
-    private boolean added;
+    public boolean added;
 
     @Basic(optional = false)
     @Column(name = "applied_employee_discount")
-    private boolean appliedEmployeeDiscount;
+    public boolean appliedEmployeeDiscount;
 
     @Basic(optional = false)
     @Column(name = "base_price")
-    private double basePrice;
+    public double basePrice;
 
     @Basic(optional = false)
     @Column(name = "base_price_incl_tax")
-    private double basePriceInclTax;
+    public double basePriceInclTax;
 
     @Basic(optional = false)
     @Column(name = "base_price_jde")
-    private double basePriceJde;
+    public double basePriceJde;
 
     @Basic(optional = false)
     @Column(name = "discount_price")
-    private double discountPrice;
+    public double discountPrice;
 
     @Basic(optional = false)
     @Column(name = "line_number")
-    private int lineNumber;
+    public int lineNumber;
 
     @Basic(optional = false)
     @Column(name = "original_base_price")
-    private double originalBasePrice;
+    public double originalBasePrice;
 
     @Basic(optional = false)
     @Column(name = "original_percent_discount")
-    private double originalPercentDiscount;
+    public double originalPercentDiscount;
 
     @Basic(optional = false)
     @Column(name = "percent_discount")
-    private double percentDiscount;
+    public double percentDiscount;
 
     @Basic(optional = false)
     @Column(name = "price_incl_tax")
-    private double priceInclTax;
+    public double priceInclTax;
 
     @Basic(optional = false)
     @Column(name = "price_to_send")
-    private double priceToSend;
+    public double priceToSend;
 
     @Basic(optional = false)
     @Column(name = "qty")
-    private int qty;
+    public int qty;
 
     @Basic(optional = false)
     @Column(name = "tax_amount")
-    private double taxAmount;
+    public double taxAmount;
 
     @Basic(optional = false)
     @Column(name = "tax_percent")
-    private double taxPercent;
+    public double taxPercent;
 
     @Basic(optional = false)
     @Column(name = "total")
-    private double total;
+    public double total;
 
     @Basic(optional = false)
     @Column(name = "total_base_price")
-    private double totalBasePrice;
+    public double totalBasePrice;
 
     @Basic(optional = false)
     @Column(name = "total_discount")
-    private double totalDiscount;
+    public double totalDiscount;
 
     @Basic(optional = false)
     @Column(name = "total_incl_tax")
-    private double totalInclTax;
+    public double totalInclTax;
 
     @Basic(optional = false)
     @Column(name = "total_tax_amount")
-    private double totalTaxAmount;
+    public double totalTaxAmount;
 
     @JoinColumns({
         @JoinColumn(name = "customers_id", referencedColumnName = "customers_id", insertable = false, updatable = false),
         @JoinColumn(name = "quotes_id", referencedColumnName = "quotes_id", insertable = false, updatable = false),
         @JoinColumn(name = "sku", referencedColumnName = "sku", insertable = false, updatable = false)})
     @ManyToOne(optional = false)
-    private QuoteItems quoteItems;
+    public QuoteItems quoteItems;
     
 }

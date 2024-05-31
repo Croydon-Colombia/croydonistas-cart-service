@@ -13,6 +13,7 @@
  */
 package com.croydon.service;
 
+import com.croydon.model.entity.Customers;
 import com.croydon.model.entity.Quotes;
 
 /**
@@ -24,7 +25,9 @@ public interface IQuotes {
     
     Quotes save(Quotes quotes);
     
-    Quotes findByCustomersId (String id);
+    Quotes findByCustomersId (Customers id);
+    
+    Quotes findByQuotesId (Long id);
     
     void delete(Quotes quotes);
     

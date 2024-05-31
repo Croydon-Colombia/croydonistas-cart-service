@@ -21,19 +21,29 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
+ * Implementación del servicio para gestionar los incrementos de ID de venta.
  *
- * @author Edwin Torres - Email: edwin.torres@croydon.com.co
+ * Esta clase implementa la interfaz ISaleIncrementsId y proporciona un método
+ * para guardar un incremento de ID de venta en la base de datos.
+ *
+ * @autor Edwin Torres - Email: edwin.torres@croydon.com.co
  */
 @Component
-public class SaleIncrementsIdImpl implements ISaleIncrementsId{
+public class SaleIncrementsIdImpl implements ISaleIncrementsId {
 
     @Autowired
     private SaleIncrementsIdDao saleIncrementsIdDaoService;
-    
+
+    /**
+     * Guarda un incremento de ID de venta en la base de datos.
+     *
+     * @param saleIncrementsId el incremento de ID de venta a guardar.
+     * @return el incremento de ID de venta guardado.
+     */
     @Transactional
     @Override
     public SaleIncrementsId save(SaleIncrementsId saleIncrementsId) {
         return saleIncrementsIdDaoService.save(saleIncrementsId);
     }
-    
+
 }
