@@ -20,18 +20,43 @@ import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
 /**
+ * Esta interfaz define la lógica de mapeo entre la entidad QuoteTotals y su DTO
+ * correspondiente QuoteTotalsDto. Utiliza MapStruct para generar
+ * automáticamente las implementaciones de mapeo.
  *
- * @author Edwin Torres - Email: edwin.torres@croydon.com.co
+ * Autor: Edwin Torres Email: edwin.torres@croydon.com.co
  */
-
 @Mapper(componentModel = "spring")
 public interface QuoteTotalsMapper {
-    
+
+    /**
+     * Instancia única de QuoteTotalsMapper para la creación de instancias.
+     */
     QuoteTotalsMapper INSTANCE = Mappers.getMapper(QuoteTotalsMapper.class);
-    
+
+    /**
+     * Convierte una entidad QuoteTotals en su DTO correspondiente.
+     *
+     * @param quotes La entidad QuoteTotals a convertir.
+     * @return El DTO de QuoteTotals resultante.
+     */
     QuoteTotalsDto quoteTotalsToQuoteTotalsDto(QuoteTotals quotes);
+
+    /**
+     * Convierte un DTO de QuoteTotals en su entidad correspondiente.
+     *
+     * @param quotes El DTO de QuoteTotals a convertir.
+     * @return La entidad QuoteTotals resultante.
+     */
     QuoteTotals quotesTotalsDtoToQuoteTotals(QuoteTotalsDto quotes);
-    
+
+    /**
+     * Convierte una lista de DTO de QuoteTotals en una lista de entidades
+     * QuoteTotals.
+     *
+     * @param quotes La lista de DTO de QuoteTotals a convertir.
+     * @return La lista de entidades QuoteTotals resultante.
+     */
     List<QuoteTotals> listQuotesTotalsDtoToQuoteTotals(List<QuoteTotalsDto> quotes);
-    
+
 }

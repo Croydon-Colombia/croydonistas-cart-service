@@ -38,6 +38,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
+ * Servicio para agregar o actualizar productos en el carrito de compras.
+ * Implementa la interfaz {@link IAddOrUpdateQuote}.
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
@@ -65,6 +67,15 @@ public class AddOrUpdateQuoteImpl implements IAddOrUpdateQuote {
     @Autowired
     private QuotesMapper quotesMapper;
 
+    
+    /**
+     * Agrega o actualiza un producto en el carrito de compras.
+     *
+     * @param shoppingCartItemRequest el producto que se desea agregar o actualizar en el carrito.
+     * @return el DTO del carrito actualizado.
+     * @throws ShippingAddressException si hay un problema con la dirección de envío.
+     * @throws ProductException si hay un problema con la disponibilidad del producto.
+     */
     @Override
     public QuotesDto addOrUpdateCartProduct(ShoppingCartItemDto shoppingCartItemRequest) throws ShippingAddressException, ProductException {
         
@@ -87,6 +98,18 @@ public class AddOrUpdateQuoteImpl implements IAddOrUpdateQuote {
         }
     }
 
+    
+    /**
+     * Añade un nuevo ítem al carrito de compras.
+     *
+     * @param quotesDto el DTO del carrito.
+     * @param quoteItemsDto el DTO del ítem del carrito.
+     * @param quantity la cantidad del producto.
+     * @param dbProduct la entidad del producto.
+     * @param currentDateTime la fecha y hora actuales.
+     * @return el DTO del carrito actualizado con los nuevos totales.
+     * @throws ShippingAddressException si hay un problema con la dirección de envío.
+     */
     private QuotesDto addNewItemToQuote(QuotesDto quotesDto, QuoteItemsDto quoteItemsDto, int quantity, Products dbProduct, Date currentDateTime) throws ShippingAddressException {
 
         quoteItemsDto.setLineNumber(quotesDto.getLineNumber());
@@ -104,6 +127,18 @@ public class AddOrUpdateQuoteImpl implements IAddOrUpdateQuote {
 
     }
 
+    
+    /**
+     * Actualiza un ítem existente en el carrito de compras.
+     *
+     * @param quotesDto el DTO del carrito.
+     * @param quoteItemsDto el DTO del ítem del carrito.
+     * @param dbProduct la entidad del producto.
+     * @param currentDateTime la fecha y hora actuales.
+     * @param quantity la cantidad del producto.
+     * @return el DTO del carrito actualizado con los nuevos totales.
+     * @throws ShippingAddressException si hay un problema con la dirección de envío.
+     */ 
     private QuotesDto updateQuoteWithNewItem(QuotesDto quotesDto, QuoteItemsDto quoteItemsDto, Products dbProduct, Date currentDateTime, int quantity) throws ShippingAddressException {
 
         quotesDto.setUpdatedAt(currentDateTime);
@@ -126,6 +161,14 @@ public class AddOrUpdateQuoteImpl implements IAddOrUpdateQuote {
         return quoteDtoWithTotals;
     }
 
+    
+    /**
+     * Comprueba si un ítem ya existe en el carrito de compras.
+     *
+     * @param quotesDto el DTO del carrito.
+     * @param quoteItemsDto el DTO del ítem del carrito.
+     * @return true si el ítem ya existe, false en caso contrario.
+     */
     private boolean existingItem(QuotesDto quotesDto, QuoteItemsDto quoteItemsDto) {
         Optional<QuoteItemsDto> existingItemOptional = quotesDto.getQuoteItemsCollection().stream()
                 .filter(item -> item.getQuoteItemsPK().equals(quoteItemsDto.getQuoteItemsPK()))
@@ -133,6 +176,13 @@ public class AddOrUpdateQuoteImpl implements IAddOrUpdateQuote {
         return existingItemOptional.isPresent();
     }
 
+    
+    /**
+     * Valida la disponibilidad de stock para el producto solicitado.
+     *
+     * @param shoppingCartItemRequest el producto que se desea validar.
+     * @throws ProductException si no hay suficiente stock disponible.
+     */
     private void validateStockAvailability(ShoppingCartItemDto shoppingCartItemRequest) throws ProductException {
         StockResponse stockResponse = stockClient.getStock(shoppingCartItemRequest.productSku, "CP001").block();
         if (stockResponse.qty < shoppingCartItemRequest.quantity) {
@@ -142,6 +192,14 @@ public class AddOrUpdateQuoteImpl implements IAddOrUpdateQuote {
         }
     }
 
+    
+    /**
+     * Configura la clave primaria de un ítem del carrito de compras.
+     *
+     * @param quotesDto el DTO del carrito.
+     * @param dbProduct la entidad del producto.
+     * @return el DTO de la clave primaria del ítem del carrito.
+     */
     private QuoteItemsPKDto setQuoteItemsPKDto(QuotesDto quotesDto, Products dbProduct) {
         QuoteItemsPKDto quoteItemsPKDto = new QuoteItemsPKDto();
 

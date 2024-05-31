@@ -13,7 +13,7 @@
  */
 package com.croydon.Infrastructure;
 
-import com.croydon.Infrastructure.dto.StockResponse;
+import com.croydon.Infrastructure.dto.IncentiveBalanceResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,46 +22,45 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 /**
- * Cliente para obtener el stock de un producto en una ubicación específica.
+ * Cliente para obtener el saldo de incentivos de un cliente.
  * 
- * Esta clase implementa la interfaz IStockClient y proporciona métodos para
- * recuperar el stock de un producto en una ubicación específica utilizando un servicio web externo.
- *
- * @author Edwin Torres - Email: edwin.torres@croydon.com.co
+ * Esta clase implementa la interfaz IInsentiveBalanceClient y proporciona métodos para
+ * recuperar el saldo de incentivos de un cliente utilizando un servicio web externo.
+ * 
+ * @autor Edwin Torres - Email: edwin.torres@croydon.com.co
  */
 @Component
-public class StockClientImpl implements IStockClient {
+public class InsentiveBalanceClientImpl implements IInsentiveBalanceClient {
 
-    private static final Logger logger = LoggerFactory.getLogger(StockClientImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(InsentiveBalanceClientImpl.class);
 
+    @Autowired
     private final WebClient webClient;
 
-    
     /**
-     * Constructor de la clase StockClientImpl.
+     * Constructor de la clase InsentiveBalanceClientImpl.
      *
      * @param webClient el WebClient utilizado para realizar solicitudes HTTP.
      */
     @Autowired
-    public StockClientImpl(WebClient webClient) {
+    public InsentiveBalanceClientImpl(WebClient webClient) {
         this.webClient = webClient;
     }
 
     /**
-     * Obtiene el stock de un producto en una bodega específica.
+     * Obtiene el saldo de incentivos de un cliente.
      *
-     * @param productId el SKU del producto.
-     * @param locationCode el código de la bodega.
-     * @return un Mono que emite la respuesta del stock del producto.
+     * @param an8 el número de cliente.
+     * @return un Mono que emite la respuesta del saldo de incentivos.
      */
     @Override
-    public Mono<StockResponse> getStock(String productId, String locationCode) {
-        String uri = String.format("online/stock/%s/%s", productId, locationCode);
+    public Mono<IncentiveBalanceResponse> getBalance(String an8) {
+        String uri = String.format("jdeservices/incentive_available/%s", an8);
         return webClient.get()
                 .uri(uri)
                 .retrieve()
-                .bodyToMono(StockResponse.class)
-                .doOnError(error -> logger.error("Error occurred while calling STOCK service", error.getMessage()));
+                .bodyToMono(IncentiveBalanceResponse.class)
+                .doOnError(error -> logger.error("Error occurred while calling IncentiveBalance service", error.getMessage()));
     }
 
 }

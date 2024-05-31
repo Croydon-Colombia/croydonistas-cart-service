@@ -19,15 +19,19 @@ import com.croydon.model.dto.QuotesDto;
 import com.croydon.service.TotalCalculatorStrategy;
 import com.croydon.utilities.DateUtils;
 import java.util.Date;
-import java.util.List;
 import org.springframework.stereotype.Service;
 
 /**
+ * Estrategia de cálculo para calcular el total del descuento en un carrito de
+ * compras.
  *
- * @author Edwin Torres - Email: edwin.torres@croydon.com.co
+ * Esta clase extiende TotalCalculatorStrategy y proporciona métodos específicos
+ * para calcular el total del descuento en un carrito de compras.
+ *
+ * @autor Edwin Torres - Email: edwin.torres@croydon.com.co
  */
 @Service
-public class DiscountTotalCalculatorImpl extends TotalCalculatorStrategy{
+public class DiscountTotalCalculatorImpl extends TotalCalculatorStrategy {
 
     @Override
     public String label() {
@@ -44,16 +48,24 @@ public class DiscountTotalCalculatorImpl extends TotalCalculatorStrategy{
         return 50;
     }
 
+    /**
+     * Calcula el total del descuento en un carrito de compras.
+     *
+     * @param quote el DTO del carrito de compras.
+     * @param quoteTotal el DTO del total del carrito de compras.
+     * @return el DTO del total del carrito de compras actualizado con el valor
+     * del descuento.
+     */
     @Override
     public QuoteTotalsDto calculateTotal(QuotesDto quote, QuoteTotalsDto quoteTotal) {
-        
+
         Date currentDate = DateUtils.getCurrentDate();
-        
+
         double discount = quote.getQuoteItemsCollection().stream().mapToDouble(QuoteItemsDto::getTotalDiscount).sum();
         quote.setDiscountAmount(-discount);
         quoteTotal.setValue(discount);
         quoteTotal.setUpdatedAt(currentDate);
         return quoteTotal;
     }
-    
+
 }

@@ -18,11 +18,19 @@ import java.time.ZoneId;
 import java.util.Date;
 
 /**
- *
- * @author Edwin Torres - Email: edwin.torres@croydon.com.co
+ * Clase utilitaria para manejar fechas.
+ * 
+ * Autor: Edwin Torres
+ * Email: edwin.torres@croydon.com.co
  */
 public class DateUtils {
     
+    
+    /**
+     * Obtiene la fecha y hora actual.
+     * 
+     * @return La fecha y hora actual como un objeto Date.
+     */
     public static Date getCurrentDate() {
         LocalDateTime localDateTime = LocalDateTime.now();
         return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());

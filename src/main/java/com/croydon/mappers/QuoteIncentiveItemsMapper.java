@@ -19,13 +19,40 @@ import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
 /**
+ * Esta interfaz define la lógica de mapeo entre las entidades de elementos de
+ * incentivo del carrito de compras y sus DTO correspondientes. Utiliza
+ * MapStruct para generar automáticamente las implementaciones de mapeo.
  *
- * @author Edwin Torres - Email: edwin.torres@croydon.com.co
+ * Autor: Edwin Torres Email: edwin.torres@croydon.com.co
  */
 @Mapper(componentModel = "spring")
 public interface QuoteIncentiveItemsMapper {
+
+    /**
+     * Instancia única de QuoteIncentiveItemsMapper para la creación de
+     * instancias.
+     */
     QuoteIncentiveItemsMapper INSTANCE = Mappers.getMapper(QuoteIncentiveItemsMapper.class);
-    
+
+    /**
+     * Convierte una entidad de elementos de incentivo del carrito de compras en
+     * su DTO correspondiente.
+     *
+     * @param quoteIncentiveItems La entidad de elementos de incentivo del
+     * carrito de compras a convertir.
+     * @return El DTO de elementos de incentivo del carrito de compras
+     * resultante.
+     */
     QuoteIncentiveItemsDto quoteIncentiveItemsToQuoteIncentiveItemsDto(QuoteIncentiveItems quoteIncentiveItems);
-    QuoteIncentiveItems quoteIncentiveItemsDtoToQuoteIncentiveItems(QuoteIncentiveItemsDto quoteIncentiveItems);
+
+    /**
+     * Convierte un DTO de elementos de incentivo del carrito de compras en su
+     * entidad correspondiente.
+     *
+     * @param quoteIncentiveItemsDto El DTO de elementos de incentivo del
+     * carrito de compras a convertir.
+     * @return La entidad de elementos de incentivo del carrito de compras
+     * resultante.
+     */
+    QuoteIncentiveItems quoteIncentiveItemsDtoToQuoteIncentiveItems(QuoteIncentiveItemsDto quoteIncentiveItemsDto);
 }

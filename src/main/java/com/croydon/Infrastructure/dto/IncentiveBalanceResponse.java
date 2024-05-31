@@ -11,24 +11,23 @@
  * El uso de este software implica la aceptación de los términos y condiciones establecidos.
  *
  */
-package com.croydon.configuration;
+package com.croydon.Infrastructure.dto;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.reactive.function.client.WebClient;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 
 /**
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-@Configuration
-public class AppConfig {
-    
-    @Bean
-    public WebClient webClient() {
-        return WebClient.builder()
-                        .baseUrl("https://apirest.croydonjde.com.co/ords/api/")
-                        .defaultHeader("Authorization", "Basic Q1JPWURPTlJFU1Q6Q3IweWQwblczYlIzNXQ=")
-                        .build();
-    }
+@Data
+public class IncentiveBalanceResponse {
+
+    @JsonProperty("an8")
+    private String an8;
+    @JsonProperty("incentivo_disponible")
+    private Double incentivoDisponible;
+    @JsonProperty("message")
+    private String message;
+
 }

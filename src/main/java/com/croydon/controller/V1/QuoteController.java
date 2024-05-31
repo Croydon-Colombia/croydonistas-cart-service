@@ -13,10 +13,12 @@
  */
 package com.croydon.controller.V1;
 
+import com.croydon.exceptions.IncentiveProductException;
 import com.croydon.exceptions.ProductException;
 import com.croydon.exceptions.ShippingAddressException;
 import com.croydon.model.dto.QuotesDto;
 import com.croydon.model.dto.ShoppingCartItemDto;
+import com.croydon.service.IIncentiveCartManager;
 import com.croydon.service.IShoppingCartManager;
 import com.croydon.utilities.ApiResponse;
 import jakarta.validation.Valid;
@@ -37,19 +39,19 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-
 @RestController
 @RequestMapping("/shopping-cart/v1")
 public class QuoteController {
-    
+
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(QuoteController.class);
+    
+    @Autowired
+    private IIncentiveCartManager incentiveCartManagerService;
     
     @Autowired
     private IShoppingCartManager shoppingCartManagerService;
     
-    /*
-    Getters methods
-    */
+    
     @GetMapping("quotes/customer/{customerId}")
     public ResponseEntity<ApiResponse<QuotesDto>> findQuotesByClientId(@PathVariable("customerId") String customerId){
         try {
@@ -61,10 +63,7 @@ public class QuoteController {
         }         
         
     }
-    
-    /*
-    Post methods
-    */
+
     @PostMapping("quotes/delete")
     public ResponseEntity<ApiResponse<QuotesDto>> deleteQuote (@RequestParam("quotesId") String quotesId){
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -88,6 +87,30 @@ public class QuoteController {
             QuotesDto response = shoppingCartManagerService.deleteCartProduct(itemsRequest);
             return ResponseEntity.ok(new ApiResponse<>(response, "Success", null));
         } catch (ShippingAddressException ex) {
+            logger.error(ex.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>(null, "Failed", ex.getMessage()));
+        }
+    }
+    
+    
+    
+    @PostMapping("incentives/add-or-update")
+    public ResponseEntity<ApiResponse<QuotesDto>> addIncentiveProduct(@Valid @RequestBody ShoppingCartItemDto itemsRequest){
+        try {
+            QuotesDto response = incentiveCartManagerService.addOrUpdateIncentiveProduct(itemsRequest);
+            return ResponseEntity.ok(new ApiResponse<>(response, "Success", null)); 
+        } catch (IncentiveProductException | ProductException ex) {
+            logger.error(ex.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>(null, "Failed", ex.getMessage()));
+        }
+    }
+    
+    @PostMapping("incentives/delete")
+    public ResponseEntity<ApiResponse<QuotesDto>> deleteIncentiveProduct(@Valid @RequestBody ShoppingCartItemDto itemsRequest){
+        try {
+            QuotesDto response = incentiveCartManagerService.deleteIncentiveProduct(itemsRequest);
+            return ResponseEntity.ok(new ApiResponse<>(response, "Success", null));
+        } catch (Exception ex) {
             logger.error(ex.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>(null, "Failed", ex.getMessage()));
         }

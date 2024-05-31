@@ -20,27 +20,43 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
+ * Implementación del servicio para obtener el ID siguiente de la orden de
+ * compra.
  *
- * @author Edwin Torres - Email: edwin.torres@croydon.com.co
+ * Esta clase implementa la interfaz IPurchaseOrderIncrementId y proporciona un
+ * método para obtener el ID siguiente de la orden de compra.
+ *
+ * @autor Edwin Torres - Email: edwin.torres@croydon.com.co
  */
 @Component
-public class PurchaseOrderIncrementIdImpl implements IPurchaseOrderIncrementId{
+public class PurchaseOrderIncrementIdImpl implements IPurchaseOrderIncrementId {
 
     @Autowired
     private ISaleIncrementsId saleIncrementsIdService;
-    
+
     private static final String PURCHASE_ORDER_PREFIX = "44";
     private static final int PURCHASE_ORDER_LENGTH = 10;
-    
+
+    /**
+     * Obtiene el ID siguiente de la orden de compra.
+     *
+     * @return el ID siguiente de la orden de compra.
+     */
     @Override
     public String getNextPurchaseOrderId() {
         SaleIncrementsId saleIncrementsId = saleIncrementsIdService.save(new SaleIncrementsId());
         long id = Long.valueOf(padLeftZeros(PURCHASE_ORDER_LENGTH)) + saleIncrementsId.getId();
         return Long.toString(id);
     }
-    
+
+    /**
+     * Rellena con ceros a la izquierda hasta alcanzar la longitud deseada.
+     *
+     * @param length la longitud total deseada.
+     * @return una cadena rellenada con ceros a la izquierda.
+     */
     protected String padLeftZeros(int length) {
         return String.format("%s%0" + (length - PURCHASE_ORDER_PREFIX.length()) + "d", PURCHASE_ORDER_PREFIX, 0);
     }
-    
+
 }

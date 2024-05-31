@@ -23,8 +23,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
+ * Implementación del servicio para gestionar los totales del carrito de
+ * compras.
  *
- * @author Edwin Torres - Email: edwin.torres@croydon.com.co
+ * Esta clase implementa la interfaz IQuoteTotals y proporciona métodos para
+ * buscar y guardar los totales del carrito de compras.
+ *
+ * @autor Edwin Torres - Email: edwin.torres@croydon.com.co
  */
 @Service
 public class QuoteTotalsImpl implements IQuoteTotals {
@@ -32,14 +37,26 @@ public class QuoteTotalsImpl implements IQuoteTotals {
     @Autowired
     QuoteTotalsDao quoteTotalsService;
 
+    /**
+     * Busca los totales del carrito de compras por su clave primaria.
+     *
+     * @param pk la clave primaria de los totales del carrito de compras.
+     * @return un Optional que contiene los totales del carrito de compras si
+     * están presentes, de lo contrario vacío.
+     */
     @Override
     public Optional<QuoteTotals> findByPk(QuoteTotalsPK pk) {
         return quoteTotalsService.findById(pk);
     }
 
+    /**
+     * Guarda todos los totales del carrito de compras.
+     *
+     * @param totals la lista de totales del carrito de compras a guardar.
+     */
     @Override
     public void saveAll(List<QuoteTotals> totals) {
         quoteTotalsService.saveAll(totals);
     }
-    
+
 }

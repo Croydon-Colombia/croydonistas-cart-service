@@ -19,14 +19,33 @@ import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
 /**
+ * Esta interfaz define la lógica de mapeo entre entidades de productos y sus
+ * DTOs asociados. Utiliza MapStruct para generar automáticamente las
+ * implementaciones de mapeo.
  *
- * @author Edwin Torres - Email: edwin.torres@croydon.com.co
+ * Autor: Edwin Torres Email: edwin.torres@croydon.com.co
  */
 @Mapper(componentModel = "spring")
 public interface ProductsMapper {
+
+    /**
+     * Instancia única de ProductsMapper para la creación de instancias.
+     */
     ProductsMapper INSTANCE = Mappers.getMapper(ProductsMapper.class);
-    
+
+    /**
+     * Convierte una entidad de Products a su DTO correspondiente.
+     *
+     * @param products La entidad de Products a convertir.
+     * @return El DTO de Products resultante.
+     */
     ProductsDto ProductsToProductsDto(Products products);
-    
+
+    /**
+     * Convierte un DTO de Products a su entidad correspondiente.
+     *
+     * @param products El DTO de Products a convertir.
+     * @return La entidad de Products resultante.
+     */
     Products ProductsDtoToProducts(ProductsDto products);
 }

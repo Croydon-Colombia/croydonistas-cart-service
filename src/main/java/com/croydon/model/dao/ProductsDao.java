@@ -14,11 +14,17 @@
 package com.croydon.model.dao;
 
 import com.croydon.model.entity.Products;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 /**
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-public interface ProductsDao extends CrudRepository<Products, String>{    
+public interface ProductsDao extends CrudRepository<Products, String>{
+    
+    @Query("SELECT q FROM Products q WHERE q.id = :sku AND q.incentive = true")
+    Products findIncetiveBySku(@Param("sku") String sku);
+    
 }

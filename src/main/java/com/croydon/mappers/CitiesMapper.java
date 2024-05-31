@@ -19,14 +19,33 @@ import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
 /**
+ * Esta interfaz define la lógica de mapeo entre entidades de ciudades y sus
+ * DTOs asociados. Utiliza MapStruct para generar automáticamente las
+ * implementaciones de mapeo.
  *
- * @author Edwin Torres - Email: edwin.torres@croydon.com.co
+ * Autor: Edwin Torres Email: edwin.torres@croydon.com.co
  */
 @Mapper(componentModel = "spring")
 public interface CitiesMapper {
+
+    /**
+     * Instancia única de CitiesMapper para la creación de instancias.
+     */
     CitiesMapper INSTANCE = Mappers.getMapper(CitiesMapper.class);
-    
+
+    /**
+     * Convierte una entidad de Cities a su DTO correspondiente.
+     *
+     * @param cities La entidad de Cities a convertir.
+     * @return El DTO de Cities resultante.
+     */
     CitiesDto CitiesToCitiesDto(Cities cities);
-    
+
+    /**
+     * Convierte un DTO de Cities a su entidad correspondiente.
+     *
+     * @param cities El DTO de Cities a convertir.
+     * @return La entidad de Cities resultante.
+     */
     Cities CitiesDtoToCities(CitiesDto cities);
 }

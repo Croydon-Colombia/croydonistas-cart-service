@@ -33,6 +33,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
+ * Implementación del servicio para la gestión del carrito de compras.
+ * Implementa la interfaz {@link IShoppingCartManager}.
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
@@ -57,6 +59,12 @@ public class ShoppingCartManagerImpl implements IShoppingCartManager {
     @Autowired
     private ICollectsQuoteTotals collectsQuoteTotalsService;
 
+    /**
+     * Obtiene o crea un carrito de compras para un cliente específico.
+     *
+     * @param customerId el ID del cliente.
+     * @return el DTO del carrito de compras.
+     */
     @Override
     public QuotesDto getOrCreateCart(String customerId) {
 
@@ -75,11 +83,28 @@ public class ShoppingCartManagerImpl implements IShoppingCartManager {
 
     }
 
+    
+    /**
+     * Agrega o actualiza un producto en el carrito de compras.
+     *
+     * @param shoppingCartItemRequest el producto que se desea agregar o actualizar en el carrito.
+     * @return el DTO del carrito de compras actualizado.
+     * @throws ShippingAddressException si hay un problema con la dirección de envío.
+     * @throws ProductException si hay un problema con la disponibilidad del producto.
+     */
     @Override
     public QuotesDto addOrUpdateCartProduct(ShoppingCartItemDto shoppingCartItemRequest) throws ShippingAddressException, ProductException {
         return addOrUpdateQuoteService.addOrUpdateCartProduct(shoppingCartItemRequest);
     }
 
+    
+    /**
+     * Elimina un producto del carrito de compras.
+     *
+     * @param shoppingCartItemRequest el producto que se desea eliminar del carrito.
+     * @return el DTO del carrito de compras actualizado.
+     * @throws ShippingAddressException si hay un problema con la dirección de envío.
+     */
     @Override
     public QuotesDto deleteCartProduct(ShoppingCartItemDto shoppingCartItemRequest) throws ShippingAddressException {
         Date currentDateTime = DateUtils.getCurrentDate();
@@ -93,9 +118,9 @@ public class ShoppingCartManagerImpl implements IShoppingCartManager {
 
         QuotesDto quoteDtoWithTotals = collectsQuoteTotalsService.quotesDto(quotesDto);
         quoteDtoWithTotals.setUpdatedAt(currentDateTime);
-        
+
         quotesService.save(quotesMapper.quotesDtoToQuotes(quoteDtoWithTotals));
-        
+
         return quoteDtoWithTotals;
     }
 }

@@ -21,18 +21,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
+ * Servicio para gestionar operaciones relacionadas con clientes.
  *
- * @author Edwin Torres - Email: edwin.torres@croydon.com.co
+ * Esta clase implementa la interfaz ICustomers y proporciona métodos para
+ * buscar clientes por ID.
+ *
+ * @autor Edwin Torres - Email: edwin.torres@croydon.com.co
  */
 @Service
 public class CustomersImpl implements ICustomers {
 
     @Autowired
     CustomersDao customersDao;
-    
+
+    /**
+     * Busca un cliente por su ID.
+     *
+     * @param id el ID del cliente a buscar.
+     * @return un Optional que contiene el cliente si se encuentra, o vacío si
+     * no.
+     */
     @Override
     public Optional<Customers> findById(String id) {
         return customersDao.findById(id);
     }
-    
+
 }

@@ -25,15 +25,32 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
+ * Implementación del servicio de cálculo de impuestos para los elementos del
+ * carrito de compras.
  *
- * @author Edwin Torres - Email: edwin.torres@croydon.com.co
+ * Esta clase implementa la interfaz IQuoteItemsTaxesCalculator y proporciona
+ * métodos para calcular los totales de los elementos del carrito de compras,
+ * teniendo en cuenta los impuestos.
+ *
+ * @autor Edwin Torres - Email: edwin.torres@croydon.com.co
  */
 @Service
 public class QuoteItemsTaxesCalculatorImpl implements IQuoteItemsTaxesCalculator {
 
     @Autowired
     private IExcludedProducts excludedProductsService;
-    
+
+    /**
+     * Calcula los totales de un elemento del carrito de compras, teniendo en
+     * cuenta los impuestos.
+     *
+     * @param quote el DTO del carrito de compras.
+     * @param quoteItem el DTO del elemento del carrito de compras.
+     * @param shippingAddress la dirección de envío del cliente.
+     * @param products el producto asociado al elemento del carrito de compras.
+     * @return el DTO del elemento del carrito de compras actualizado con los
+     * totales.
+     */
     @Override
     public QuoteItemsDto calculateItemTotals(QuotesDto quote, QuoteItemsDto quoteItem, AddressesDto shippingAddress, Products products) {
 
@@ -42,61 +59,107 @@ public class QuoteItemsTaxesCalculatorImpl implements IQuoteItemsTaxesCalculator
         boolean isExcludedRegion = shippingAddress.getCitiesId().getRegionsId().getExcluded();
         boolean isExcludedCity = shippingAddress.getCitiesId().getExcluded();
 
-        if (isExcludedCity || isExcludedRegion) {
-            withoutTax(quoteItem,products);
-        } else if (isExemptCustomer || isExemptRegion) {
+        if (isExcludedCity || isExemptCustomer || isExcludedRegion) {
             withoutTax(quoteItem, products);
         } else {
-            Optional<ExcludedProducts> excludedItem 
-                    = excludedProductsService.findBySku(quoteItem.getQuoteItemsPK().getSku());
-            if (excludedItem.isPresent()) {
+            if (isExemptCustomer || isExcludedRegion) {
                 withoutTax(quoteItem, products);
+            } else if (isExemptCustomer || isExemptRegion) {
+                Optional<ExcludedProducts> excludedItem
+                        = excludedProductsService.findBySku(quoteItem.getQuoteItemsPK().getSku());
+                if (excludedItem.isPresent()) {
+                    withoutTax(quoteItem, products);
+                } else {
+                    calculateTax(quoteItem, products);
+                }
             } else {
-                calculateTax(quoteItem);
+                calculateTax(quoteItem, products);
             }
         }
 
         return updateQuoteItemTotals(quoteItem);
     }
 
-    private QuoteItemsDto withoutTax(QuoteItemsDto quoteItem, Products products) {
-        
+    /**
+     * Calcula los totales de un elemento del carrito de compras incluyendo
+     * impuestos.
+     *
+     * @param quoteItem el DTO del elemento del carrito de compras.
+     * @param products el producto asociado al elemento del carrito de compras.
+     * @return el DTO del elemento del carrito de compras actualizado con los
+     * totales con impuestos.
+     */
+    private QuoteItemsDto calculateTax(QuoteItemsDto quoteItem, Products products) {
+
         double taxPercent = products.getTaxPercent() / 100;
         double discountPercent = products.getCustomerDiscount() / 100;
-        
+
         double discountTotal = products.getPrice() * discountPercent;
         double basePrice = products.getPrice() - discountTotal;
         double basePriceTax = basePrice * taxPercent;
         double basePriceWithTax = basePrice + basePriceTax;
-        
+
         quoteItem.setBasePrice(basePrice);
         quoteItem.setBasePriceInclTax(basePriceWithTax);
         quoteItem.setBasePriceJde(basePrice);
         quoteItem.setDiscountPrice(discountTotal);
         quoteItem.setPriceInclTax(basePriceWithTax);
         quoteItem.setTaxAmount(basePriceTax);
-        
+
         quoteItem.setPercentDiscount(products.getCustomerDiscount());
-        
+
         quoteItem.setTotalBasePrice(basePrice);
         quoteItem.setTotalDiscount(discountTotal);
         quoteItem.setTotalInclTax(basePriceWithTax);
         quoteItem.setTotalOriginalBasePrice(products.getPrice());
         quoteItem.setTotalTaxAmount(basePriceTax);
         quoteItem.setOriginalBasePrice(products.getPrice());
-        
+
         return quoteItem;
     }
 
-    private QuoteItemsDto calculateTax(QuoteItemsDto quoteItem) {
-        double taxAmount = quoteItem.getBasePrice() * (quoteItem.getTaxPercent() / 100);
-        quoteItem.setTaxAmount(taxAmount);
-        quoteItem.setPriceInclTax(quoteItem.getBasePrice() + taxAmount);
-        double basePriceInclTax = quoteItem.getBasePrice() * (1 + (quoteItem.getTaxPercent() / 100));
-        quoteItem.setBasePriceInclTax(basePriceInclTax);
+    /**
+     * Calcula los totales de un elemento del carrito de compras sin incluir
+     * impuestos.
+     *
+     * @param quoteItem el DTO del elemento del carrito de compras.
+     * @param products el producto asociado al elemento del carrito de compras.
+     * @return el DTO del elemento del carrito de compras actualizado con los
+     * totales sin impuestos.
+     */
+    private QuoteItemsDto withoutTax(QuoteItemsDto quoteItem, Products products) {
+
+        double discountPercent = products.getCustomerDiscount() / 100;
+
+        double discountTotal = products.getPrice() * discountPercent;
+        double basePrice = products.getPrice() - discountTotal;
+
+        quoteItem.setBasePrice(basePrice);
+        quoteItem.setBasePriceInclTax(basePrice);
+        quoteItem.setBasePriceJde(basePrice);
+        quoteItem.setDiscountPrice(discountTotal);
+        quoteItem.setPriceInclTax(basePrice);
+        quoteItem.setTaxAmount(0);
+
+        quoteItem.setPercentDiscount(products.getCustomerDiscount());
+
+        quoteItem.setTotalBasePrice(basePrice);
+        quoteItem.setTotalDiscount(discountTotal);
+        quoteItem.setTotalInclTax(basePrice);
+        quoteItem.setTotalOriginalBasePrice(products.getPrice());
+        quoteItem.setTotalTaxAmount(0);
+        quoteItem.setOriginalBasePrice(products.getPrice());
+
         return quoteItem;
     }
 
+    /**
+     * Actualiza los totales del elemento del carrito de compras.
+     *
+     * @param quoteItem el DTO del elemento del carrito de compras.
+     * @return el DTO del elemento del carrito de compras actualizado con los
+     * totales.
+     */
     private QuoteItemsDto updateQuoteItemTotals(QuoteItemsDto quoteItem) {
         quoteItem.setTotalBasePrice(quoteItem.getBasePrice() * quoteItem.getQty());
         quoteItem.setTotalDiscount(quoteItem.getDiscountPrice() * quoteItem.getQty());

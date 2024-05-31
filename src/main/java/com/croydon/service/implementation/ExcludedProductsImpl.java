@@ -21,8 +21,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- *
- * @author Edwin Torres - Email: edwin.torres@croydon.com.co
+ * Servicio para gestionar productos excluidos.
+ * 
+ * Esta clase implementa la interfaz IExcludedProducts y proporciona métodos para
+ * buscar productos excluidos por su SKU.
+ * 
+ * @autor Edwin Torres - Email: edwin.torres@croydon.com.co
  */
 @Service
 public class ExcludedProductsImpl implements IExcludedProducts{
@@ -30,6 +34,13 @@ public class ExcludedProductsImpl implements IExcludedProducts{
     @Autowired
     private ExcludedProductsDao excludedProducts;
 
+    
+    /**
+     * Busca un producto excluido por su SKU.
+     *
+     * @param sku el SKU del producto excluido a buscar.
+     * @return un Optional que contiene el producto excluido si se encuentra, o vacío si no.
+     */
     @Override
     public Optional<ExcludedProducts> findBySku(String sku) {
         return excludedProducts.findById(sku);

@@ -22,9 +22,15 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 /**
+ * Implementación del servicio para calcular los totales de envío en un carrito
+ * de compras.
  *
- * @author Edwin Torres - Email: edwin.torres@croydon.com.co
-@Service */
+ * Esta clase extiende TotalCalculatorStrategy y proporciona la lógica para
+ * calcular los totales de envío, incluyendo el impuesto correspondiente, en un
+ * carrito de compras.
+ *
+ * @autor Edwin Torres - Email: edwin.torres@croydon.com.co
+ */
 @Service
 public class ShippingTotalsCalculatorImpl extends TotalCalculatorStrategy {
 
@@ -33,7 +39,7 @@ public class ShippingTotalsCalculatorImpl extends TotalCalculatorStrategy {
         return "Costos de envío";
     }
 
-    @Override 
+    @Override
     public String code() {
         return "shipping_amount";
     }
@@ -43,6 +49,17 @@ public class ShippingTotalsCalculatorImpl extends TotalCalculatorStrategy {
         return 60;
     }
 
+    /**
+     * Calcula el total de costos de envío, incluyendo el impuesto
+     * correspondiente.
+     *
+     * @param quote el DTO de la cotización.
+     * @param quoteTotal el DTO del total de la cotización.
+     * @return el DTO del total de la cotización actualizado con los costos de
+     * envío.
+     * @throws ShippingAddressException si no se encuentra la dirección de envío
+     * para el cliente.
+     */
     @Override
     public QuoteTotalsDto calculateTotal(QuotesDto quote, QuoteTotalsDto quoteTotal) throws ShippingAddressException {
 

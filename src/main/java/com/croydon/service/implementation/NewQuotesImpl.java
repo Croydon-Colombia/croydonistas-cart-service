@@ -23,37 +23,48 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
+ * Servicio para crear nuevos carritos de compras.
  *
- * @author Edwin Torres - Email: edwin.torres@croydon.com.co
+ * Esta clase implementa la interfaz INewQuotes y proporciona métodos para crear
+ * nuevos carritos de compras.
+ *
+ * @autor Edwin Torres - Email: edwin.torres@croydon.com.co
  */
 @Service
 public class NewQuotesImpl implements INewQuotes {
-    
+
     @Autowired
     private IPurchaseOrderIncrementId purchaseOrderIncrementIdService;
     @Autowired
     private CustomersImpl CustomersService;
 
+    /**
+     * Crea un nuevo carrito de compras para un cliente.
+     *
+     * @param customerId el ID del cliente para el que se va a crear el carrito
+     * de compras.
+     * @return el carrito de compras recién creado.
+     */
     @Override
     public Quotes makeNewQuotes(String customerId) {
-        
+
         Quotes quote = new Quotes();
         Date currentDate = DateUtils.getCurrentDate();
-        
-        String purchaseOrderIncrement = purchaseOrderIncrementIdService.getNextPurchaseOrderId();        
-        
+
+        String purchaseOrderIncrement = purchaseOrderIncrementIdService.getNextPurchaseOrderId();
+
         quote.setIncrementId(purchaseOrderIncrement);
-        
+
         Customers customer = CustomersService.findById(customerId).get();
-        
+
         quote.setDiscountAmount(customer.getDiscount());
-        quote.setCustomersId(customer);        
+        quote.setCustomersId(customer);
         quote.setAvailable(true);
         quote.setCreatedAt(currentDate);
         quote.setUpdatedAt(currentDate);
         quote.setLineNumber(1);
-        
+
         return quote;
     }
-    
+
 }

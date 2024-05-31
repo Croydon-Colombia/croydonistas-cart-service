@@ -68,12 +68,7 @@
             <version>4.4</version>
             <type>jar</type>
         </dependency>
-        <!-- Spring Web -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-
+        
         <!-- Spring WebFlux for WebClient -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

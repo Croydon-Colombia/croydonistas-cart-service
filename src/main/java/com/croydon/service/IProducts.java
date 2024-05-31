@@ -13,6 +13,7 @@
  */
 package com.croydon.service;
 
+import com.croydon.exceptions.IncentiveProductException;
 import com.croydon.exceptions.ProductException;
 import com.croydon.model.entity.Products;
 
@@ -23,5 +24,7 @@ import com.croydon.model.entity.Products;
 public interface IProducts  {
 
     Products findProductById(String id) throws ProductException;
+    
+    Products findIncetiveBySku(String sku) throws IncentiveProductException;
     
 }

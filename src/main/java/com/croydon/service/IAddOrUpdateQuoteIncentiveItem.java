@@ -11,24 +11,18 @@
  * El uso de este software implica la aceptación de los términos y condiciones establecidos.
  *
  */
-package com.croydon.configuration;
+package com.croydon.service;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.reactive.function.client.WebClient;
+import com.croydon.exceptions.IncentiveProductException;
+import com.croydon.exceptions.ProductException;
+import com.croydon.model.dto.QuotesDto;
+import com.croydon.model.dto.ShoppingCartItemDto;
 
 /**
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-@Configuration
-public class AppConfig {
+public interface IAddOrUpdateQuoteIncentiveItem {
     
-    @Bean
-    public WebClient webClient() {
-        return WebClient.builder()
-                        .baseUrl("https://apirest.croydonjde.com.co/ords/api/")
-                        .defaultHeader("Authorization", "Basic Q1JPWURPTlJFU1Q6Q3IweWQwblczYlIzNXQ=")
-                        .build();
-    }
+    QuotesDto addOrUpdateCartIncentiveItem(ShoppingCartItemDto shoppingCartItemRequest) throws IncentiveProductException, ProductException;
 }

@@ -26,8 +26,13 @@ import org.springframework.stereotype.Service;
 import com.croydon.service.ICollectsQuoteTotals;
 
 /**
+ * Servicio para calcular los totales de un carrito de compras.
  *
- * @author Edwin Torres - Email: edwin.torres@croydon.com.co
+ * Esta clase implementa la interfaz ICollectsQuoteTotals y proporciona métodos
+ * para calcular los totales de un carrito de compras utilizando diferentes
+ * estrategias de cálculo.
+ *
+ * @autor Edwin Torres - Email: edwin.torres@croydon.com.co
  */
 @Service
 public class CollectsQuoteTotalsCalculatorImpl implements ICollectsQuoteTotals {
@@ -35,6 +40,15 @@ public class CollectsQuoteTotalsCalculatorImpl implements ICollectsQuoteTotals {
     @Autowired
     private ApplicationContext applicationContext;
 
+    /**
+     * Calcula los totales de un carrito de compras.
+     *
+     * @param quote el DTO del carrito de compras.
+     * @return el DTO del carrito de compras actualizado con los totales
+     * calculados.
+     * @throws ShippingAddressException si hay un problema con la dirección de
+     * envío.
+     */
     @Override
     public QuotesDto quotesDto(QuotesDto quote) throws ShippingAddressException {
 

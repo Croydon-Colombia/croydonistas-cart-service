@@ -11,24 +11,18 @@
  * El uso de este software implica la aceptación de los términos y condiciones establecidos.
  *
  */
-package com.croydon.configuration;
+package com.croydon.service;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.reactive.function.client.WebClient;
+import com.croydon.exceptions.IncentiveProductException;
+import com.croydon.model.dto.QuotesDto;
+import com.croydon.model.dto.ShoppingCartItemDto;
+import com.croydon.model.entity.Products;
 
 /**
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-@Configuration
-public class AppConfig {
-    
-    @Bean
-    public WebClient webClient() {
-        return WebClient.builder()
-                        .baseUrl("https://apirest.croydonjde.com.co/ords/api/")
-                        .defaultHeader("Authorization", "Basic Q1JPWURPTlJFU1Q6Q3IweWQwblczYlIzNXQ=")
-                        .build();
-    }
+public interface IIncentiveOperations {
+
+    void isIncentiveSumValid(QuotesDto quotesDto, Products dbProduct, ShoppingCartItemDto shoppingCartItemRequest, double incentiveBalance) throws IncentiveProductException;
 }

@@ -18,12 +18,13 @@ import com.croydon.model.dto.QuoteItemsDto;
 import com.croydon.model.dto.QuoteTotalsDto;
 import com.croydon.model.dto.QuotesDto;
 import com.croydon.service.TotalCalculatorStrategy;
-import java.util.List;
 import org.springframework.stereotype.Service;
 
 /**
+ * Implementación del servicio para el cálculo del subtotal inclusivo de
+ * impuestos en una orden. Implementa la interfaz TotalCalculatorStrategy.
  *
- * @author Edwin Torres - Email: edwin.torres@croydon.com.co
+ * @autor Edwin Torres - Email: edwin.torres@croydon.com.co
  */
 @Service
 public class TaxInclusiveOrderCalculatorImpl extends TotalCalculatorStrategy {
@@ -43,6 +44,17 @@ public class TaxInclusiveOrderCalculatorImpl extends TotalCalculatorStrategy {
         return 20;
     }
 
+    /**
+     * Calcula el subtotal inclusivo de impuestos para una orden.
+     *
+     * @param quote El objeto QuotesDto que representa la orden.
+     * @param quoteTotal El objeto QuoteTotalsDto que contiene los totales de la
+     * orden.
+     * @return El objeto QuoteTotalsDto actualizado con el subtotal inclusivo de
+     * impuestos.
+     * @throws ShippingAddressException Si hay un problema con la dirección de
+     * envío.
+     */
     @Override
     public QuoteTotalsDto calculateTotal(QuotesDto quote, QuoteTotalsDto quoteTotal) throws ShippingAddressException {
         double total = quote.getQuoteItemsCollection().stream().mapToDouble(QuoteItemsDto::getTotalInclTax).sum();
@@ -50,5 +62,5 @@ public class TaxInclusiveOrderCalculatorImpl extends TotalCalculatorStrategy {
         quoteTotal.setValue(total);
         return quoteTotal;
     }
-    
+
 }

@@ -19,14 +19,38 @@ import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
 /**
+ * Esta interfaz define la lógica de mapeo entre las claves primarias de los
+ * elementos del carrito de compras y sus DTO correspondientes. Utiliza
+ * MapStruct para generar automáticamente las implementaciones de mapeo.
  *
- * @author Edwin Torres - Email: edwin.torres@croydon.com.co
+ * Autor: Edwin Torres Email: edwin.torres@croydon.com.co
  */
 @Mapper(componentModel = "spring")
 public interface QuoteItemsPKMapper {
+
+    /**
+     * Instancia única de QuoteItemsPKMapper para la creación de instancias.
+     */
     QuoteItemsPKMapper INSTANCE = Mappers.getMapper(QuoteItemsPKMapper.class);
-    
+
+    /**
+     * Convierte una clave primaria de elementos del carrito de compras en su
+     * DTO correspondiente.
+     *
+     * @param quoteItemsPK La clave primaria de elementos del carrito de compras
+     * a convertir.
+     * @return El DTO de clave primaria de elementos del carrito de compras
+     * resultante.
+     */
     QuoteItemsPKDto quoteItemsPKToQuoteItemsPKDto(QuoteItemsPK quoteItemsPK);
-    
+
+    /**
+     * Convierte un DTO de clave primaria de elementos del carrito de compras en
+     * su clave primaria correspondiente.
+     *
+     * @param quoteItemsPKDto El DTO de clave primaria de elementos del carrito
+     * de compras a convertir.
+     * @return La clave primaria de elementos del carrito de compras resultante.
+     */
     QuoteItemsPK quoteItemsPKDtoToQuoteItemsPK(QuoteItemsPKDto quoteItemsPK);
 }
