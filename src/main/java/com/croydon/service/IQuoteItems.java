@@ -11,16 +11,23 @@
  * El uso de este software implica la aceptación de los términos y condiciones establecidos.
  *
  */
-package com.croydon.Infrastructure;
+package com.croydon.service;
 
-import com.croydon.Infrastructure.dto.StockResponse;
-import reactor.core.publisher.Mono;
+import com.croydon.model.entity.QuoteItems;
+import java.util.List;
 
 /**
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-public interface IStockClient {
+public interface IQuoteItems {
 
-    Mono<StockResponse> getStock(String productId, String locationCode);
+    QuoteItems save(QuoteItems quoteItems);
+    
+    void saveAll(List<QuoteItems> quoteItems);
+    
+    void delete(QuoteItems quoteItems);
+    
+    void deleteAll(List<QuoteItems> quoteItems);
+    
 }

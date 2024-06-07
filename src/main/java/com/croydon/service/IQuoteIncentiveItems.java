@@ -13,21 +13,19 @@
  */
 package com.croydon.service;
 
-import com.croydon.model.entity.QuoteTotals;
-import com.croydon.model.entity.QuoteTotalsPK;
-import java.util.List;
+import com.croydon.model.entity.QuoteIncentiveItems;
+import com.croydon.model.entity.QuoteIncentiveItemsPK;
 import java.util.Optional;
 
 /**
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-public interface IQuoteTotals {
+public interface IQuoteIncentiveItems {
     
-    Optional<QuoteTotals> findByPk(QuoteTotalsPK pk);
+    QuoteIncentiveItems save(QuoteIncentiveItems quoteIncentiveItems);
     
-    void saveAll(List<QuoteTotals> totals);
+    Optional<QuoteIncentiveItems> findByPk(QuoteIncentiveItemsPK quoteIncentiveItemsPK);
     
-    void deleteAll(List<QuoteTotals> quoteTotals);
-    
+    void delete(QuoteIncentiveItems quoteIncentiveItems);
 }

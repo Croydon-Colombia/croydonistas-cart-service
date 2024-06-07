@@ -13,6 +13,7 @@
  */
 package com.croydon.service;
 
+import com.croydon.exceptions.ProductException;
 import com.croydon.model.dto.AddressesDto;
 import com.croydon.model.dto.QuoteItemsDto;
 import com.croydon.model.dto.QuotesDto;
@@ -23,5 +24,5 @@ import com.croydon.model.entity.Products;
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
 public interface IQuoteItemsTaxesCalculator {
-    QuoteItemsDto calculateItemTotals(QuotesDto quote, QuoteItemsDto quoteItem, AddressesDto shippingAddress, Products products);
+    QuoteItemsDto calculateItemTotals(QuotesDto quote, QuoteItemsDto quoteItem, AddressesDto shippingAddress, Products products) throws ProductException;
 }

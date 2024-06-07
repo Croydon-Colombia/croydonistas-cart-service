@@ -11,23 +11,17 @@
  * El uso de este software implica la aceptación de los términos y condiciones establecidos.
  *
  */
-package com.croydon.service;
+package com.croydon.Infrastructure.service;
 
-import com.croydon.model.entity.QuoteTotals;
-import com.croydon.model.entity.QuoteTotalsPK;
-import java.util.List;
-import java.util.Optional;
+import com.croydon.Infrastructure.dto.IncentiveBalanceResponse;
+import reactor.core.publisher.Mono;
 
 /**
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-public interface IQuoteTotals {
+public interface IInsentiveBalanceClient {
     
-    Optional<QuoteTotals> findByPk(QuoteTotalsPK pk);
-    
-    void saveAll(List<QuoteTotals> totals);
-    
-    void deleteAll(List<QuoteTotals> quoteTotals);
+    public Mono<IncentiveBalanceResponse> getBalance(String an8);
     
 }

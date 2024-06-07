@@ -13,6 +13,7 @@
  */
 package com.croydon.service;
 
+import com.croydon.exceptions.ProductException;
 import com.croydon.model.dto.QuoteItemsDto;
 import com.croydon.model.dto.QuotesDto;
 import com.croydon.model.entity.Products;
@@ -23,6 +24,6 @@ import com.croydon.model.entity.Products;
  */
 public interface IAddQuoteItem {
     
-    QuotesDto addNewQuoteItem(QuotesDto quotesDto, QuoteItemsDto quoteItemsDto, Products product);
+    QuotesDto addNewQuoteItem(QuotesDto quotesDto, QuoteItemsDto quoteItemsDto, Products product) throws ProductException;
     
 }

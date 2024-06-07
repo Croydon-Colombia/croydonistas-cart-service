@@ -11,12 +11,13 @@
  * El uso de este software implica la aceptación de los términos y condiciones establecidos.
  *
  */
-package com.croydon.Infrastructure;
+package com.croydon.Infrastructure.service.implementation;
 
+import com.croydon.Infrastructure.service.IStockClient;
 import com.croydon.Infrastructure.dto.StockResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -42,8 +43,7 @@ public class StockClientImpl implements IStockClient {
      *
      * @param webClient el WebClient utilizado para realizar solicitudes HTTP.
      */
-    @Autowired
-    public StockClientImpl(WebClient webClient) {
+    public StockClientImpl(@Qualifier("webClient") WebClient webClient) {
         this.webClient = webClient;
     }
 

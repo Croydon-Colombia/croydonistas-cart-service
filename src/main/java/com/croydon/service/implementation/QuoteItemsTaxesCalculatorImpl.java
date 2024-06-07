@@ -13,6 +13,7 @@
  */
 package com.croydon.service.implementation;
 
+import com.croydon.exceptions.ProductException;
 import com.croydon.model.dto.AddressesDto;
 import com.croydon.model.dto.QuoteItemsDto;
 import com.croydon.model.dto.QuotesDto;
@@ -50,9 +51,10 @@ public class QuoteItemsTaxesCalculatorImpl implements IQuoteItemsTaxesCalculator
      * @param products el producto asociado al elemento del carrito de compras.
      * @return el DTO del elemento del carrito de compras actualizado con los
      * totales.
+     * @throws com.croydon.exceptions.ProductException
      */
     @Override
-    public QuoteItemsDto calculateItemTotals(QuotesDto quote, QuoteItemsDto quoteItem, AddressesDto shippingAddress, Products products) {
+    public QuoteItemsDto calculateItemTotals(QuotesDto quote, QuoteItemsDto quoteItem, AddressesDto shippingAddress, Products products) throws ProductException {
 
         boolean isExemptCustomer = quote.getCustomersId().getExempt() != null && quote.getCustomersId().getExempt();
         boolean isExemptRegion = shippingAddress.getCitiesId().getRegionsId().getExempt();
@@ -127,7 +129,11 @@ public class QuoteItemsTaxesCalculatorImpl implements IQuoteItemsTaxesCalculator
      * @return el DTO del elemento del carrito de compras actualizado con los
      * totales sin impuestos.
      */
-    private QuoteItemsDto withoutTax(QuoteItemsDto quoteItem, Products products) {
+    private QuoteItemsDto withoutTax(QuoteItemsDto quoteItem, Products products) throws ProductException {
+
+        if (products.getCustomerDiscount() == null) {
+            throw new ProductException("Descuento no definido para el producto: " + quoteItem.getQuoteItemsPK().getSku());
+        }
 
         double discountPercent = products.getCustomerDiscount() / 100;
 

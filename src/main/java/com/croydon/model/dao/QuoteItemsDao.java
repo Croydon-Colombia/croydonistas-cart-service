@@ -11,17 +11,16 @@
  * El uso de este software implica la aceptación de los términos y condiciones establecidos.
  *
  */
-package com.croydon.Infrastructure;
+package com.croydon.model.dao;
 
-import com.croydon.Infrastructure.dto.IncentiveBalanceResponse;
-import reactor.core.publisher.Mono;
+import com.croydon.model.entity.QuoteItems;
+import com.croydon.model.entity.QuoteItemsPK;
+import org.springframework.data.repository.CrudRepository;
 
 /**
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-public interface IInsentiveBalanceClient {
-    
-    public Mono<IncentiveBalanceResponse> getBalance(String an8);
+public interface QuoteItemsDao extends CrudRepository<QuoteItems, QuoteItemsPK>{
     
 }

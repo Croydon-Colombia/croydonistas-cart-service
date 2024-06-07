@@ -19,8 +19,8 @@ import com.croydon.mappers.QuotesMapper;
 import com.croydon.model.dto.QuotesDto;
 import com.croydon.model.dto.ShoppingCartItemDto;
 import com.croydon.model.entity.Customers;
+import com.croydon.model.entity.QuoteItems;
 import com.croydon.model.entity.Quotes;
-import com.croydon.service.IAddOrUpdateQuote;
 import com.croydon.service.ICollectsQuoteTotals;
 import com.croydon.service.ICustomers;
 import com.croydon.service.INewQuotes;
@@ -31,6 +31,9 @@ import java.util.Date;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.croydon.service.IAddOrUpdateQuoteItem;
+import com.croydon.service.IQuoteItems;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Implementación del servicio para la gestión del carrito de compras.
@@ -54,10 +57,13 @@ public class ShoppingCartManagerImpl implements IShoppingCartManager {
     private ICustomers customersService;
 
     @Autowired
-    private IAddOrUpdateQuote addOrUpdateQuoteService;
+    private IAddOrUpdateQuoteItem addOrUpdateQuoteService;
 
     @Autowired
     private ICollectsQuoteTotals collectsQuoteTotalsService;
+
+    @Autowired
+    IQuoteItems quoteItemsService;
 
     /**
      * Obtiene o crea un carrito de compras para un cliente específico.
@@ -65,6 +71,7 @@ public class ShoppingCartManagerImpl implements IShoppingCartManager {
      * @param customerId el ID del cliente.
      * @return el DTO del carrito de compras.
      */
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public QuotesDto getOrCreateCart(String customerId) {
 
@@ -83,28 +90,32 @@ public class ShoppingCartManagerImpl implements IShoppingCartManager {
 
     }
 
-    
     /**
      * Agrega o actualiza un producto en el carrito de compras.
      *
-     * @param shoppingCartItemRequest el producto que se desea agregar o actualizar en el carrito.
+     * @param shoppingCartItemRequest el producto que se desea agregar o
+     * actualizar en el carrito.
      * @return el DTO del carrito de compras actualizado.
-     * @throws ShippingAddressException si hay un problema con la dirección de envío.
-     * @throws ProductException si hay un problema con la disponibilidad del producto.
+     * @throws ShippingAddressException si hay un problema con la dirección de
+     * envío.
+     * @throws ProductException si hay un problema con la disponibilidad del
+     * producto.
      */
     @Override
     public QuotesDto addOrUpdateCartProduct(ShoppingCartItemDto shoppingCartItemRequest) throws ShippingAddressException, ProductException {
         return addOrUpdateQuoteService.addOrUpdateCartProduct(shoppingCartItemRequest);
     }
 
-    
     /**
      * Elimina un producto del carrito de compras.
      *
-     * @param shoppingCartItemRequest el producto que se desea eliminar del carrito.
+     * @param shoppingCartItemRequest el producto que se desea eliminar del
+     * carrito.
      * @return el DTO del carrito de compras actualizado.
-     * @throws ShippingAddressException si hay un problema con la dirección de envío.
+     * @throws ShippingAddressException si hay un problema con la dirección de
+     * envío.
      */
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public QuotesDto deleteCartProduct(ShoppingCartItemDto shoppingCartItemRequest) throws ShippingAddressException {
         Date currentDateTime = DateUtils.getCurrentDate();
@@ -112,15 +123,45 @@ public class ShoppingCartManagerImpl implements IShoppingCartManager {
         Quotes dbQuotes = quotesService.findByQuotesId(shoppingCartItemRequest.quotes_id);
         QuotesDto quotesDto = quotesMapper.quotesToQuotesDto(dbQuotes);
 
+        QuoteItems itemToRemove = dbQuotes.getQuoteItemsCollection()
+                .stream()
+                .filter(item -> item.getQuoteItemsPK().getSku().equals(shoppingCartItemRequest.getProductSku()))
+                .findFirst()
+                .orElseThrow(() -> new ShippingAddressException("Producto sku: " + shoppingCartItemRequest.getProductSku() + ", no encontrado en este pedido."));
+
         quotesDto.getQuoteItemsCollection()
                 .removeIf(item -> item.getQuoteItemsPK().getSku()
-                .equals(shoppingCartItemRequest.getProductSku()));
+                .equals(shoppingCartItemRequest.getProductSku())
+                );
 
         QuotesDto quoteDtoWithTotals = collectsQuoteTotalsService.quotesDto(quotesDto);
+
         quoteDtoWithTotals.setUpdatedAt(currentDateTime);
 
-        quotesService.save(quotesMapper.quotesDtoToQuotes(quoteDtoWithTotals));
+        Quotes quotesToUpdate = quotesMapper.quotesDtoToQuotes(quoteDtoWithTotals);
+
+        updateQuoteHeaderWithTotals(quotesToUpdate);
+
+        quoteItemsService.delete(itemToRemove);
 
         return quoteDtoWithTotals;
+    }
+
+    private void updateQuoteHeaderWithTotals(Quotes quotesDto) {
+        Quotes quoteUpdate = quotesDto;
+        quoteUpdate.setQuoteIncentiveItemsCollection(null);
+        quoteUpdate.setQuoteItemsCollection(null);
+        quoteUpdate.setQuoteTotalsCollection(null);
+        quotesService.save(quoteUpdate);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void deleteQuote(Long quotesId) throws Exception {
+        Quotes quote = quotesService.findByQuotesId(quotesId);
+        if (quote == null) {
+            throw new Exception("Carrito de compras: " + quotesId + ", no encontrado.");
+        }
+        quotesService.delete(quote);
     }
 }

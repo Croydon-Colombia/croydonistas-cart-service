@@ -13,11 +13,12 @@
  */
 package com.croydon.service.implementation;
 
-import com.croydon.Infrastructure.IInsentiveBalanceClient;
+import com.croydon.Infrastructure.service.IInsentiveBalanceClient;
 import com.croydon.Infrastructure.dto.IncentiveBalanceResponse;
 import com.croydon.exceptions.IncentiveProductException;
 import com.croydon.exceptions.ProductException;
 import com.croydon.mappers.ProductsToQuotesItemsIncentiveMapper;
+import com.croydon.mappers.QuoteIncentiveItemsMapper;
 import com.croydon.mappers.QuotesMapper;
 import com.croydon.model.dto.CustomersDto;
 import com.croydon.model.dto.QuoteIncentiveItemsDto;
@@ -29,12 +30,14 @@ import com.croydon.model.entity.Quotes;
 import com.croydon.service.IAddOrUpdateQuoteIncentiveItem;
 import com.croydon.service.IIncentiveOperations;
 import com.croydon.service.IProducts;
+import com.croydon.service.IQuoteIncentiveItems;
 import com.croydon.service.IQuotes;
 import com.croydon.utilities.DateUtils;
 import java.util.Date;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Implementación del servicio para agregar o actualizar elementos de incentivos
@@ -64,6 +67,12 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
     @Autowired
     private ProductsToQuotesItemsIncentiveMapper productsToQuotesItemsIncentiveMapper;
 
+    @Autowired
+    private IQuoteIncentiveItems quoteIncentiveItemsService;
+
+    @Autowired
+    private QuoteIncentiveItemsMapper quoteIncentiveItemsMapper;
+
     /**
      * Agrega o actualiza un producto de incentivo en el carrito de compras.
      *
@@ -75,6 +84,7 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
      * @throws ProductException si hay un problema con la disponibilidad del
      * producto.
      */
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public QuotesDto addOrUpdateCartIncentiveItem(ShoppingCartItemDto shoppingCartItemRequest) throws IncentiveProductException, ProductException {
 
@@ -113,6 +123,7 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
      * actualizar.
      * @return el DTO de la cotización actualizada.
      */
+    @Transactional(rollbackFor = Exception.class)
     private QuotesDto updateQuoteWithExistingIncentiveItem(QuotesDto quotesDto, QuoteIncentiveItemsDto quoteIncentiveItemsDto, Date currentDate, ShoppingCartItemDto shoppingCartItemRequest) {
 
         quotesDto.setUpdatedAt(currentDate);
@@ -125,7 +136,7 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
 
         quotesDto.getQuoteIncentiveItemsCollection()
                 .removeIf(item -> item.getQuoteIncentiveItemsPK()
-                .equals(quoteIncentiveItemsDto.getQuoteIncentiveItemsPK()));
+                .equals(existingItemExist.getQuoteIncentiveItemsPK()));
 
         existingItemExist.setUpdatedAt(currentDate);
         existingItemExist.setQty(shoppingCartItemRequest.getQuantity());
@@ -133,7 +144,11 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
 
         quotesDto.getQuoteIncentiveItemsCollection().add(existingItemExist);
 
-        quotesService.save(quotesMapper.quotesDtoToQuotes(quotesDto));
+        quoteIncentiveItemsService.save(quoteIncentiveItemsMapper.quoteIncentiveItemsDtoToQuoteIncentiveItems(existingItemExist));
+
+        Quotes quotesToUpdate = quotesMapper.quotesDtoToQuotes(quotesDto);
+
+        updateQuoteHeaderWithTotals(quotesToUpdate);
 
         return quotesDto;
     }
@@ -149,6 +164,7 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
      * agregar.
      * @return el DTO de la cotización actualizada.
      */
+    @Transactional(rollbackFor = Exception.class)
     private QuotesDto updateQuoteWithNewIncentiveItem(Products dbProduct, QuotesDto quotesDto, QuoteIncentiveItemsDto quoteIncentiveItemsDto, Date currentDate, ShoppingCartItemDto shoppingCartItemRequest) {
 
         QuoteIncentiveItemsPKDto quoteIncentiveItemsPKDto = new QuoteIncentiveItemsPKDto();
@@ -162,14 +178,16 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
         quoteIncentiveItemsDto.setIncentives(dbProduct.getLevelIncentive());
         quoteIncentiveItemsDto.setLineNumber(quotesDto.getLineNumber());
         quoteIncentiveItemsDto.setTotal(pointsRequest);
+        quoteIncentiveItemsDto.setQty(shoppingCartItemRequest.getQuantity());
         quoteIncentiveItemsDto.setCreatedAt(currentDate);
         quoteIncentiveItemsDto.setUpdatedAt(currentDate);
         quoteIncentiveItemsDto.setAdded(true);
 
         quotesDto.setLineNumber(quotesDto.getLineNumber() + 1);
         quotesDto.getQuoteIncentiveItemsCollection().add(quoteIncentiveItemsDto);
-
-        quotesService.save(quotesMapper.quotesDtoToQuotes(quotesDto));
+        quotesDto.setHasIncentives(true);
+        
+        quoteIncentiveItemsService.save(quoteIncentiveItemsMapper.quoteIncentiveItemsDtoToQuoteIncentiveItems(quoteIncentiveItemsDto));
 
         return quotesDto;
     }
@@ -199,5 +217,13 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
 
         return insentiveBalanceClient.getBalance(customer.getId()).block();
 
+    }
+
+    private void updateQuoteHeaderWithTotals(Quotes quotesDto) {
+        Quotes quoteUpdate = quotesDto;
+        quoteUpdate.setQuoteIncentiveItemsCollection(null);
+        quoteUpdate.setQuoteItemsCollection(null);
+        quoteUpdate.setQuoteTotalsCollection(null);
+        quotesService.save(quoteUpdate);
     }
 }

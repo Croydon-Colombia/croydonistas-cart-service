@@ -65,9 +65,14 @@ public class QuoteController {
     }
 
     @PostMapping("quotes/delete")
-    public ResponseEntity<ApiResponse<QuotesDto>> deleteQuote (@RequestParam("quotesId") String quotesId){
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ApiResponse<>(null, "Not implemented!", null));
+    public ResponseEntity<ApiResponse<QuotesDto>> deleteQuote (@RequestParam("quotesId") Long quotesId){
+        try {
+            shoppingCartManagerService.deleteQuote(quotesId);
+            return ResponseEntity.ok(new ApiResponse<>(null, "Carrito de compras: " + quotesId + ", Eliminado!", null));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ApiResponse<>(null, ex.getMessage(), null));
+        }
     }
     
     @PostMapping("products/add-or-update")
