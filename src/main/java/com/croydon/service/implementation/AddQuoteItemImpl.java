@@ -13,16 +13,20 @@
  */
 package com.croydon.service.implementation;
 
+import com.croydon.exceptions.ProductException;
+import com.croydon.mappers.QuoteItemsMapper;
 import com.croydon.model.dto.AddressesDto;
 import com.croydon.model.dto.QuoteItemsDto;
 import com.croydon.model.dto.QuoteItemsPKDto;
 import com.croydon.model.dto.QuotesDto;
 import com.croydon.model.entity.Products;
 import com.croydon.service.IAddQuoteItem;
+import com.croydon.service.IQuoteItems;
 import com.croydon.service.IQuoteItemsTaxesCalculator;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Servicio para agregar un nuevo ítem a un carrito de compras.
@@ -39,7 +43,12 @@ public class AddQuoteItemImpl implements IAddQuoteItem {
     @Autowired
     private IQuoteItemsTaxesCalculator quoteItemsTaxesCalculator;
 
-    
+    @Autowired
+    private IQuoteItems quoteItemsService;
+
+    @Autowired
+    private QuoteItemsMapper quoteItemsMapper;
+
     /**
      * Agrega un nuevo ítem a un carrito de compras.
      *
@@ -47,9 +56,11 @@ public class AddQuoteItemImpl implements IAddQuoteItem {
      * @param quoteItemsDto el DTO del ítem de cotización a agregar.
      * @param product el producto relacionado con el ítem de carrito de compras.
      * @return el DTO del carrito de compras actualizado con el nuevo ítem.
+     * @throws com.croydon.exceptions.ProductException
      */
+    @Transactional(rollbackFor = Exception.class)
     @Override
-    public QuotesDto addNewQuoteItem(QuotesDto quotesDto, QuoteItemsDto quoteItemsDto, Products product) {
+    public QuotesDto addNewQuoteItem(QuotesDto quotesDto, QuoteItemsDto quoteItemsDto, Products product) throws ProductException {
 
         QuoteItemsPKDto quoteItemsPKDto = new QuoteItemsPKDto();
         quoteItemsPKDto.setCustomersId(quotesDto.getCustomersId().getId());
@@ -65,10 +76,12 @@ public class AddQuoteItemImpl implements IAddQuoteItem {
                 .filter(address -> address.getShipping().equals(true))
                 .findFirst();
 
-        QuoteItemsDto quoteWithTaxes
+        QuoteItemsDto quoteItemWithTaxes
                 = quoteItemsTaxesCalculator.calculateItemTotals(quotesDto, quoteItemsDto, shippingAddressOptional.get(), product);
+        
+        quoteItemsService.save(quoteItemsMapper.quoteItemsDtoToQuoteItems(quoteItemWithTaxes));
 
-        quotesDto.getQuoteItemsCollection().add(quoteWithTaxes);
+        quotesDto.getQuoteItemsCollection().add(quoteItemWithTaxes);
 
         return quotesDto;
     }

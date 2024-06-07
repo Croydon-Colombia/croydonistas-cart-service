@@ -13,21 +13,16 @@
  */
 package com.croydon.service;
 
-import com.croydon.model.entity.QuoteTotals;
-import com.croydon.model.entity.QuoteTotalsPK;
-import java.util.List;
-import java.util.Optional;
+import com.croydon.exceptions.ProductException;
+import com.croydon.exceptions.ShippingAddressException;
+import com.croydon.model.dto.QuotesDto;
+import com.croydon.model.dto.ShoppingCartItemDto;
 
 /**
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-public interface IQuoteTotals {
-    
-    Optional<QuoteTotals> findByPk(QuoteTotalsPK pk);
-    
-    void saveAll(List<QuoteTotals> totals);
-    
-    void deleteAll(List<QuoteTotals> quoteTotals);
-    
+public interface IAddOrUpdateQuoteItem {
+
+    QuotesDto addOrUpdateCartProduct(ShoppingCartItemDto shoppingCartItemRequest) throws ShippingAddressException, ProductException;
 }

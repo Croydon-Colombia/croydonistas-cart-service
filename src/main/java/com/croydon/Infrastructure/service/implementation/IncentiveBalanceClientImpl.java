@@ -11,40 +11,43 @@
  * El uso de este software implica la aceptación de los términos y condiciones establecidos.
  *
  */
-package com.croydon.Infrastructure;
+package com.croydon.Infrastructure.service.implementation;
 
+import com.croydon.Infrastructure.service.IInsentiveBalanceClient;
 import com.croydon.Infrastructure.dto.IncentiveBalanceResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 /**
  * Cliente para obtener el saldo de incentivos de un cliente.
- * 
- * Esta clase implementa la interfaz IInsentiveBalanceClient y proporciona métodos para
- * recuperar el saldo de incentivos de un cliente utilizando un servicio web externo.
- * 
+ *
+ * Esta clase implementa la interfaz IInsentiveBalanceClient y proporciona
+ * métodos para recuperar el saldo de incentivos de un cliente utilizando un
+ * servicio web externo.
+ *
  * @autor Edwin Torres - Email: edwin.torres@croydon.com.co
  */
 @Component
-public class InsentiveBalanceClientImpl implements IInsentiveBalanceClient {
+public class IncentiveBalanceClientImpl implements IInsentiveBalanceClient {
 
-    private static final Logger logger = LoggerFactory.getLogger(InsentiveBalanceClientImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(IncentiveBalanceClientImpl.class);
 
     @Autowired
-    private final WebClient webClient;
+    private final WebClient oAuthWebClient;
 
     /**
      * Constructor de la clase InsentiveBalanceClientImpl.
      *
-     * @param webClient el WebClient utilizado para realizar solicitudes HTTP.
+     * @param oAuthWebClient el WebClient utilizado para realizar solicitudes
+     * HTTP.
      */
-    @Autowired
-    public InsentiveBalanceClientImpl(WebClient webClient) {
-        this.webClient = webClient;
+    public IncentiveBalanceClientImpl(@Qualifier("oAuthWebClient") WebClient oAuthWebClient) {
+        this.oAuthWebClient = oAuthWebClient;
     }
 
     /**
@@ -55,8 +58,10 @@ public class InsentiveBalanceClientImpl implements IInsentiveBalanceClient {
      */
     @Override
     public Mono<IncentiveBalanceResponse> getBalance(String an8) {
+
         String uri = String.format("jdeservices/incentive_available/%s", an8);
-        return webClient.get()
+
+        return oAuthWebClient.get()
                 .uri(uri)
                 .retrieve()
                 .bodyToMono(IncentiveBalanceResponse.class)

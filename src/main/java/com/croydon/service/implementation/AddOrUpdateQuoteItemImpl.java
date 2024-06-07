@@ -13,7 +13,7 @@
  */
 package com.croydon.service.implementation;
 
-import com.croydon.Infrastructure.IStockClient;
+import com.croydon.Infrastructure.service.IStockClient;
 import com.croydon.Infrastructure.dto.StockResponse;
 import com.croydon.exceptions.ProductException;
 import com.croydon.exceptions.ShippingAddressException;
@@ -25,7 +25,6 @@ import com.croydon.model.dto.QuotesDto;
 import com.croydon.model.dto.ShoppingCartItemDto;
 import com.croydon.model.entity.Products;
 import com.croydon.model.entity.Quotes;
-import com.croydon.service.IAddOrUpdateQuote;
 import com.croydon.service.IAddQuoteItem;
 import com.croydon.service.ICollectsQuoteTotals;
 import com.croydon.service.IProducts;
@@ -36,15 +35,17 @@ import java.util.Date;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.croydon.service.IAddOrUpdateQuoteItem;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Servicio para agregar o actualizar productos en el carrito de compras.
- * Implementa la interfaz {@link IAddOrUpdateQuote}.
+ * Implementa la interfaz {@link IAddOrUpdateQuoteItem}.
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
 @Service
-public class AddOrUpdateQuoteImpl implements IAddOrUpdateQuote {
+public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
 
     @Autowired
     private IStockClient stockClient;
@@ -76,6 +77,7 @@ public class AddOrUpdateQuoteImpl implements IAddOrUpdateQuote {
      * @throws ShippingAddressException si hay un problema con la dirección de envío.
      * @throws ProductException si hay un problema con la disponibilidad del producto.
      */
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public QuotesDto addOrUpdateCartProduct(ShoppingCartItemDto shoppingCartItemRequest) throws ShippingAddressException, ProductException {
         
@@ -92,7 +94,7 @@ public class AddOrUpdateQuoteImpl implements IAddOrUpdateQuote {
         quoteItemsDto.setQuoteItemsPK(setQuoteItemsPKDto(quotesDto, dbProduct));
 
         if (existingItem(quotesDto, quoteItemsDto)) {
-            return updateQuoteWithNewItem(quotesDto, quoteItemsDto, dbProduct, currentDateTime, shoppingCartItemRequest.getQuantity());
+            return updateQuoteWithExististItem(quotesDto, quoteItemsDto, dbProduct, currentDateTime, shoppingCartItemRequest.getQuantity());
         } else {
             return addNewItemToQuote(quotesDto, quoteItemsDto, shoppingCartItemRequest.quantity, dbProduct, currentDateTime);
         }
@@ -110,7 +112,8 @@ public class AddOrUpdateQuoteImpl implements IAddOrUpdateQuote {
      * @return el DTO del carrito actualizado con los nuevos totales.
      * @throws ShippingAddressException si hay un problema con la dirección de envío.
      */
-    private QuotesDto addNewItemToQuote(QuotesDto quotesDto, QuoteItemsDto quoteItemsDto, int quantity, Products dbProduct, Date currentDateTime) throws ShippingAddressException {
+    @Transactional(rollbackFor = Exception.class)
+    private QuotesDto addNewItemToQuote(QuotesDto quotesDto, QuoteItemsDto quoteItemsDto, int quantity, Products dbProduct, Date currentDateTime) throws ShippingAddressException, ProductException {
 
         quoteItemsDto.setLineNumber(quotesDto.getLineNumber());
         quoteItemsDto.setQty(quantity);
@@ -120,9 +123,12 @@ public class AddOrUpdateQuoteImpl implements IAddOrUpdateQuote {
         QuotesDto updatedQuotesDto = IAddQuoteItemService.addNewQuoteItem(quotesDto, quoteItemsDto, dbProduct);
         QuotesDto quoteDtoWithTotals = collectsQuoteTotalsService.quotesDto(updatedQuotesDto);
 
-        quotesDto.setLineNumber(quotesDto.getLineNumber() + 1);
+        quoteDtoWithTotals.setLineNumber(quotesDto.getLineNumber() + 1);
 
-        quotesService.save(quotesMapper.quotesDtoToQuotes(quoteDtoWithTotals));
+        Quotes quotesToUpdate = quotesMapper.quotesDtoToQuotes(quoteDtoWithTotals);
+        
+        updateQuoteHeaderWithTotals(quotesToUpdate);
+        
         return quoteDtoWithTotals;
 
     }
@@ -138,8 +144,9 @@ public class AddOrUpdateQuoteImpl implements IAddOrUpdateQuote {
      * @param quantity la cantidad del producto.
      * @return el DTO del carrito actualizado con los nuevos totales.
      * @throws ShippingAddressException si hay un problema con la dirección de envío.
-     */ 
-    private QuotesDto updateQuoteWithNewItem(QuotesDto quotesDto, QuoteItemsDto quoteItemsDto, Products dbProduct, Date currentDateTime, int quantity) throws ShippingAddressException {
+     */
+    @Transactional(rollbackFor = Exception.class)
+    private QuotesDto updateQuoteWithExististItem(QuotesDto quotesDto, QuoteItemsDto quoteItemsDto, Products dbProduct, Date currentDateTime, int quantity) throws ShippingAddressException, ProductException {
 
         quotesDto.setUpdatedAt(currentDateTime);
 
@@ -157,7 +164,10 @@ public class AddOrUpdateQuoteImpl implements IAddOrUpdateQuote {
         QuotesDto updatedQuotesDto = IAddQuoteItemService.addNewQuoteItem(quotesDto, existingItemExist, dbProduct);
         QuotesDto quoteDtoWithTotals = collectsQuoteTotalsService.quotesDto(updatedQuotesDto);
 
-        quotesService.save(quotesMapper.quotesDtoToQuotes(quoteDtoWithTotals));
+        Quotes quotesToUpdate = quotesMapper.quotesDtoToQuotes(quoteDtoWithTotals);
+        
+        updateQuoteHeaderWithTotals(quotesToUpdate);
+        
         return quoteDtoWithTotals;
     }
 
@@ -185,7 +195,7 @@ public class AddOrUpdateQuoteImpl implements IAddOrUpdateQuote {
      */
     private void validateStockAvailability(ShoppingCartItemDto shoppingCartItemRequest) throws ProductException {
         StockResponse stockResponse = stockClient.getStock(shoppingCartItemRequest.productSku, "CP001").block();
-        if (stockResponse.qty < shoppingCartItemRequest.quantity) {
+        if (stockResponse.getQty() < shoppingCartItemRequest.getQuantity()) {
             throw new ProductException(
                     MessageFormat.format("Cantidad solicitada {0}, disponible {1}", shoppingCartItemRequest.quantity, stockResponse.qty)
             );
@@ -210,4 +220,12 @@ public class AddOrUpdateQuoteImpl implements IAddOrUpdateQuote {
         return quoteItemsPKDto;
     }
 
+    
+    private void updateQuoteHeaderWithTotals(Quotes quotesDto){
+        Quotes quoteUpdate = quotesDto;
+        quoteUpdate.setQuoteIncentiveItemsCollection(null);
+        quoteUpdate.setQuoteItemsCollection(null);
+        quoteUpdate.setQuoteTotalsCollection(null);
+        quotesService.save(quoteUpdate);        
+    }
 }

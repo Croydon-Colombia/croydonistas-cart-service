@@ -27,5 +27,6 @@ public interface IShoppingCartManager {
     QuotesDto getOrCreateCart(String customerId);
     QuotesDto addOrUpdateCartProduct(ShoppingCartItemDto shoppingCartItemRequest) throws ShippingAddressException, ProductException;
     QuotesDto deleteCartProduct(ShoppingCartItemDto shoppingCartItemRequest) throws ShippingAddressException;
+    void deleteQuote(Long quotesId) throws Exception;
     
 }

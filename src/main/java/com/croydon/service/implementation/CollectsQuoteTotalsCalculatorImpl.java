@@ -14,6 +14,7 @@
 package com.croydon.service.implementation;
 
 import com.croydon.exceptions.ShippingAddressException;
+import com.croydon.mappers.QuoteTotalsMapper;
 import com.croydon.model.dto.QuoteTotalsDto;
 import com.croydon.model.dto.QuotesDto;
 import com.croydon.service.TotalCalculatorStrategy;
@@ -24,6 +25,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import com.croydon.service.ICollectsQuoteTotals;
+import com.croydon.service.IQuoteTotals;
+import com.croydon.utilities.DateUtils;
+import java.util.Date;
+import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Servicio para calcular los totales de un carrito de compras.
@@ -37,8 +43,16 @@ import com.croydon.service.ICollectsQuoteTotals;
 @Service
 public class CollectsQuoteTotalsCalculatorImpl implements ICollectsQuoteTotals {
 
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(CollectsQuoteTotalsCalculatorImpl.class);
+
     @Autowired
     private ApplicationContext applicationContext;
+
+    @Autowired
+    private IQuoteTotals quoteTotalsService;
+
+    @Autowired
+    private QuoteTotalsMapper quoteTotalsMapper;
 
     /**
      * Calcula los totales de un carrito de compras.
@@ -49,9 +63,12 @@ public class CollectsQuoteTotalsCalculatorImpl implements ICollectsQuoteTotals {
      * @throws ShippingAddressException si hay un problema con la dirección de
      * envío.
      */
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public QuotesDto quotesDto(QuotesDto quote) throws ShippingAddressException {
 
+        Date currentDate = DateUtils.getCurrentDate();
+        
         List<TotalCalculatorStrategy> totals
                 = new ArrayList<>(this.applicationContext.getBeansOfType(TotalCalculatorStrategy.class).values());
 
@@ -65,11 +82,14 @@ public class CollectsQuoteTotalsCalculatorImpl implements ICollectsQuoteTotals {
                         QuoteTotalsDto result = action.calculateTotal(quote);
                         result.setPosition(action.position());
                         QuoteTotalsDto collectedTotal = action.calculateTotal(quote, result);
+                        collectedTotal.setUpdatedAt(currentDate);
                         quoteTotalList.add(collectedTotal);
                     } catch (ShippingAddressException e) {
-                        int lel = 19;
+                        logger.error(e.getMessage());
                     }
                 });
+
+        quoteTotalsService.saveAll(quoteTotalsMapper.listQuotesTotalsDtoToQuoteTotals(quoteTotalList));
 
         quote.setQuoteTotalsCollection(quoteTotalList);
 

@@ -59,4 +59,9 @@ public class QuoteTotalsImpl implements IQuoteTotals {
         quoteTotalsService.saveAll(totals);
     }
 
+    @Override
+    public void deleteAll(List<QuoteTotals> quoteTotals) {
+        quoteTotalsService.saveAll(quoteTotals);
+    }
+
 }

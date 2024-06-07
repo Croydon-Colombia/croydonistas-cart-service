@@ -11,23 +11,24 @@
  * El uso de este software implica la aceptación de los términos y condiciones establecidos.
  *
  */
-package com.croydon.service;
+package com.croydon.Infrastructure.dto;
 
-import com.croydon.model.entity.QuoteTotals;
-import com.croydon.model.entity.QuoteTotalsPK;
-import java.util.List;
-import java.util.Optional;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
-public interface IQuoteTotals {
-    
-    Optional<QuoteTotals> findByPk(QuoteTotalsPK pk);
-    
-    void saveAll(List<QuoteTotals> totals);
-    
-    void deleteAll(List<QuoteTotals> quoteTotals);
-    
-}
+public class OAuthTokenResponse {
+
+        @JsonProperty("access_token")
+        private String accessToken;
+
+        public String getAccessToken() {
+            return accessToken;
+        }
+
+        public void setAccessToken(String accessToken) {
+            this.accessToken = accessToken;
+        }
+    }
