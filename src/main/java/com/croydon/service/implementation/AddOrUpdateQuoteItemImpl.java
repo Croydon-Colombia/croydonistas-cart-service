@@ -80,7 +80,10 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public QuotesDto addOrUpdateCartProduct(ShoppingCartItemDto shoppingCartItemRequest) throws ShippingAddressException, ProductException {
-        
+      
+        if(shoppingCartItemRequest.quantity < 1){
+         throw  new ProductException( "ingresa cantidad valida para  añadir producto " );
+        }
         validateStockAvailability(shoppingCartItemRequest);
 
         Date currentDateTime = DateUtils.getCurrentDate();

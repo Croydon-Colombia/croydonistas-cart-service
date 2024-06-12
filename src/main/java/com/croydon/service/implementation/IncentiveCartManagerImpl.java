@@ -16,8 +16,10 @@ package com.croydon.service.implementation;
 import com.croydon.exceptions.IncentiveProductException;
 import com.croydon.exceptions.ProductException;
 import com.croydon.mappers.QuotesMapper;
+import com.croydon.model.dao.QuoteIncentiveItemsDao;
 import com.croydon.model.dto.QuotesDto;
 import com.croydon.model.dto.ShoppingCartItemDto;
+import com.croydon.model.entity.QuoteIncentiveItems;
 import com.croydon.model.entity.Quotes;
 import com.croydon.service.IAddOrUpdateQuoteIncentiveItem;
 import com.croydon.service.IIncentiveCartManager;
@@ -26,6 +28,7 @@ import com.croydon.utilities.DateUtils;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Gestor de incentivos para un carrito de compras.
@@ -47,6 +50,9 @@ public class IncentiveCartManagerImpl implements IIncentiveCartManager {
 
     @Autowired
     private QuotesMapper quotesMapper;
+    @Autowired
+    QuoteIncentiveItemsDao quoteIncentiveItemsService;
+    
 
     /**
      * Agrega o actualiza un producto de incentivo en un carrito de compras.
@@ -74,21 +80,43 @@ public class IncentiveCartManagerImpl implements IIncentiveCartManager {
      * @return el DTO del carrito de compras actualizado.
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public QuotesDto deleteIncentiveProduct(ShoppingCartItemDto shoppingCartItemRequest) {
-        Date currentDateTime = DateUtils.getCurrentDate();
+        
+            Date currentDateTime = DateUtils.getCurrentDate();
 
-        Quotes dbQuotes = quotesService.findByQuotesId(shoppingCartItemRequest.quotes_id);
-        QuotesDto quotesDto = quotesMapper.quotesToQuotesDto(dbQuotes);
+    // Buscar la entidad Quotes por su ID
+    Quotes dbQuotes = quotesService.findByQuotesId(shoppingCartItemRequest.quotes_id);
+    QuotesDto quotesDto = quotesMapper.quotesToQuotesDto(dbQuotes);
+    
+    // Filtrar y encontrar el incentivo que se va a eliminar
+    QuoteIncentiveItems incentiveToRemove = dbQuotes.getQuoteIncentiveItemsCollection()
+            .stream()
+            .filter(item -> item.getQuoteIncentiveItemsPK().getSku().equals(shoppingCartItemRequest.getProductSku()))
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("Producto sku: " + shoppingCartItemRequest.getProductSku() + ", no encontrado en este pedido."));
+    
+    // Eliminar el incentivo de la colección en el DTO
+    quotesDto.getQuoteIncentiveItemsCollection()
+            .removeIf(item -> item.getQuoteIncentiveItemsPK().getSku().equals(shoppingCartItemRequest.getProductSku()));
 
-        quotesDto.getQuoteIncentiveItemsCollection()
-                .removeIf(item -> item.getQuoteIncentiveItemsPK().getSku()
-                .equals(shoppingCartItemRequest.getProductSku()));
+    // Actualizar la fecha de actualización
+    quotesDto.setUpdatedAt(currentDateTime);
 
-        quotesDto.setUpdatedAt(currentDateTime);
+    // Convertir el DTO de vuelta a la entidad
+    Quotes quotesToUpdate = quotesMapper.quotesDtoToQuotes(quotesDto);
 
-        quotesService.save(quotesMapper.quotesDtoToQuotes(quotesDto));
+    // Actualizar la cabecera con los totales (si es necesario)
+   // updateQuoteHeaderWithTotals(quotesToUpdate);
 
-        return quotesDto;
+    // Eliminar el incentivo específico
+    quoteIncentiveItemsService.delete(incentiveToRemove);
+
+    // Guardar la entidad Quotes actualizada
+    quotesService.save(quotesToUpdate);
+
+    return quotesDto;
+
 
     }
 

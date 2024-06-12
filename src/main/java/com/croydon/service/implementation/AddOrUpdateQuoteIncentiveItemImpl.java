@@ -88,6 +88,9 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
     @Override
     public QuotesDto addOrUpdateCartIncentiveItem(ShoppingCartItemDto shoppingCartItemRequest) throws IncentiveProductException, ProductException {
 
+        if (shoppingCartItemRequest.quantity < 1) {
+            throw new IncentiveProductException("ingresa cantidad valida para añadir incentivo ");
+        }
         Date currentDate = DateUtils.getCurrentDate();
 
         Quotes dbQuotes = quotesService.findByQuotesId(shoppingCartItemRequest.quotes_id);
@@ -103,9 +106,38 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
         Products dbProduct = productsComponent.findIncetiveBySku(shoppingCartItemRequest.productSku);
         QuoteIncentiveItemsDto quoteIncentiveItemsDto = productsToQuotesItemsIncentiveMapper.ProductsToQuoteIncentiveItemsDto(dbProduct);
 
-        incentiveOperationsService.isIncentiveSumValid(quotesDto, dbProduct, shoppingCartItemRequest, incentiveBalance.getIncentivoDisponible());
+        QuoteIncentiveItemsPKDto quoteIncentiveItemsPKDto = new QuoteIncentiveItemsPKDto();
+        quoteIncentiveItemsPKDto.setCustomersId(quotesDto.getCustomersId().getId());
+        quoteIncentiveItemsPKDto.setSku(shoppingCartItemRequest.productSku);
+        quoteIncentiveItemsPKDto.setQuotesId(shoppingCartItemRequest.quotes_id);
+        quoteIncentiveItemsDto.setQuoteIncentiveItemsPK(quoteIncentiveItemsPKDto);
+        // Verifica si el ítem ya existe en la cotización
+        boolean itemExists = existingItem(quotesDto, quoteIncentiveItemsDto);
 
-        if (existingItem(quotesDto, quoteIncentiveItemsDto)) {
+        // Si el ítem existe, actualiza temporalmente los datos del ítem existente para la validación
+        if (itemExists) {
+            QuoteIncentiveItemsDto existingItem = quotesDto.getQuoteIncentiveItemsCollection().stream()
+                    .filter(item -> item.getQuoteIncentiveItemsPK().equals(quoteIncentiveItemsDto.getQuoteIncentiveItemsPK()))
+                    .findFirst()
+                    .orElseThrow(() -> new ProductException("El producto de incentivo no se encontró en la cotización."));
+            int originalQty = existingItem.getQty();
+            double originalTotal = existingItem.getTotal();
+            existingItem.setQty(shoppingCartItemRequest.getQuantity());
+            existingItem.setTotal(existingItem.getIncentives() * shoppingCartItemRequest.getQuantity());
+
+            // Realiza la validación del incentivo con los datos actualizados
+            incentiveOperationsService.isIncentiveSumValid(quotesDto, dbProduct, shoppingCartItemRequest, incentiveBalance.getIncentivoDisponible());
+
+            // Restaura los datos originales después de la validación
+            existingItem.setQty(originalQty);
+            existingItem.setTotal(originalTotal);
+        } else {
+            // Realiza la validación del incentivo con los nuevos datos
+            incentiveOperationsService.isIncentiveSumValid(quotesDto, dbProduct, shoppingCartItemRequest, incentiveBalance.getIncentivoDisponible());
+        }
+
+        // Actualiza o agrega el ítem de incentivo
+        if (itemExists) {
             return updateQuoteWithExistingIncentiveItem(quotesDto, quoteIncentiveItemsDto, currentDate, shoppingCartItemRequest);
         } else {
             return updateQuoteWithNewIncentiveItem(dbProduct, quotesDto, quoteIncentiveItemsDto, currentDate, shoppingCartItemRequest);
@@ -167,14 +199,8 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
     @Transactional(rollbackFor = Exception.class)
     private QuotesDto updateQuoteWithNewIncentiveItem(Products dbProduct, QuotesDto quotesDto, QuoteIncentiveItemsDto quoteIncentiveItemsDto, Date currentDate, ShoppingCartItemDto shoppingCartItemRequest) {
 
-        QuoteIncentiveItemsPKDto quoteIncentiveItemsPKDto = new QuoteIncentiveItemsPKDto();
-        quoteIncentiveItemsPKDto.setCustomersId(quotesDto.getCustomersId().getId());
-        quoteIncentiveItemsPKDto.setSku(shoppingCartItemRequest.productSku);
-        quoteIncentiveItemsPKDto.setQuotesId(shoppingCartItemRequest.quotes_id);
 
         double pointsRequest = dbProduct.getLevelIncentive() * shoppingCartItemRequest.getQuantity();
-
-        quoteIncentiveItemsDto.setQuoteIncentiveItemsPK(quoteIncentiveItemsPKDto);
         quoteIncentiveItemsDto.setIncentives(dbProduct.getLevelIncentive());
         quoteIncentiveItemsDto.setLineNumber(quotesDto.getLineNumber());
         quoteIncentiveItemsDto.setTotal(pointsRequest);
@@ -186,7 +212,7 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
         quotesDto.setLineNumber(quotesDto.getLineNumber() + 1);
         quotesDto.getQuoteIncentiveItemsCollection().add(quoteIncentiveItemsDto);
         quotesDto.setHasIncentives(true);
-        
+
         quoteIncentiveItemsService.save(quoteIncentiveItemsMapper.quoteIncentiveItemsDtoToQuoteIncentiveItems(quoteIncentiveItemsDto));
 
         return quotesDto;
