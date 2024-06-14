@@ -46,7 +46,7 @@ public class IncentiveOperationsImpl implements IIncentiveOperations {
      */
     @Override
     public void isIncentiveSumValid(QuotesDto quotesDto, Products dbProduct, ShoppingCartItemDto shoppingCartItemRequest, double incentiveBalance) throws IncentiveProductException {
-
+         
         double pointsRequest = dbProduct.getLevelIncentive() * shoppingCartItemRequest.getQuantity();
         double totalRedeemedPoints = calculateTotalRedeemedPoints(quotesDto);
 
@@ -54,6 +54,28 @@ public class IncentiveOperationsImpl implements IIncentiveOperations {
 
         if (totalPoints > incentiveBalance) {
             throw new IncentiveProductException("Cupo de incentivos: " + incentiveBalance + ". Solicitado: " + totalPoints);
+        }
+    }
+    
+    
+    /**
+     * Valida si la suma de puntos de incentivo a actualizar es válida en un carrito de
+     * compras.
+     *
+     * @param quotesDto el DTO del carrito de compras.
+     * @param dbProduct el producto relacionado con el producto de incentivo.
+     * @param shoppingCartItemRequest el DTO del producto de incentivo que se
+     * desea agregar.
+     * @param incentiveBalance el saldo de incentivos disponible.
+     * @throws IncentiveProductException si hay un problema con el producto de
+     * incentivo.
+     */
+    
+    @Override
+    public void isIncentiveUpdateSumValid(QuotesDto quotesDto, Products dbProduct, ShoppingCartItemDto shoppingCartItemRequest, double incentiveBalance) throws IncentiveProductException {
+         double totalRedeemedPoints = calculateTotalRedeemedPoints(quotesDto);
+          if (totalRedeemedPoints > incentiveBalance) {
+            throw new IncentiveProductException("Cupo de incentivos: " + incentiveBalance + ". Solicitado: " + totalRedeemedPoints);
         }
     }
 
@@ -69,4 +91,6 @@ public class IncentiveOperationsImpl implements IIncentiveOperations {
                 .mapToDouble(QuoteIncentiveItemsDto::getTotal)
                 .sum();
     }
+
+    
 }
