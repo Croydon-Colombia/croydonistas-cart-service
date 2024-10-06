@@ -25,4 +25,5 @@ import com.croydon.model.entity.Products;
 public interface IIncentiveOperations {
 
     void isIncentiveSumValid(QuotesDto quotesDto, Products dbProduct, ShoppingCartItemDto shoppingCartItemRequest, double incentiveBalance) throws IncentiveProductException;
+    void isIncentiveUpdateSumValid(QuotesDto quotesDto, Products dbProduct, ShoppingCartItemDto shoppingCartItemRequest, double incentiveBalance) throws IncentiveProductException;
 }
