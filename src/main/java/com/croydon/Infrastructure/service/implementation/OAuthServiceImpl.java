@@ -15,6 +15,7 @@ package com.croydon.Infrastructure.service.implementation;
 
 import com.croydon.Infrastructure.dto.OAuthTokenResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -31,10 +32,16 @@ public class OAuthServiceImpl {
 
     @Autowired
     private final WebClient webClient;
+    
+    @Value("${jde_oauth_token}")
+    private String oauthToken;
+    
+    @Value("${apex_base_uri}")
+    private String apexBaseUri;
 
     public OAuthServiceImpl(WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder
-                .baseUrl("https://trapirest.croydonjde.com.co/ords/api/")
+                .baseUrl(apexBaseUri)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                 .build();
     }
@@ -42,7 +49,7 @@ public class OAuthServiceImpl {
     public Mono<String> getAccessToken() {
         return webClient.post()
                 .uri("oauth/token")
-                .header(HttpHeaders.AUTHORIZATION, "Basic V21RbDNHQUhnNEF3cDBwUl82VUZxZy4uOkdINTFfdXVKYi1fdmxlV04xZDl4S2cuLg==")
+                .header(HttpHeaders.AUTHORIZATION, "Basic " + oauthToken)
                 .body(BodyInserters.fromFormData("grant_type", "client_credentials"))
                 .retrieve()
                 .bodyToMono(OAuthTokenResponse.class)

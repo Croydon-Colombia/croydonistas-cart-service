@@ -68,21 +68,23 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
     @Autowired
     private QuotesMapper quotesMapper;
 
-    
     /**
      * Agrega o actualiza un producto en el carrito de compras.
      *
-     * @param shoppingCartItemRequest el producto que se desea agregar o actualizar en el carrito.
+     * @param shoppingCartItemRequest el producto que se desea agregar o
+     * actualizar en el carrito.
      * @return el DTO del carrito actualizado.
-     * @throws ShippingAddressException si hay un problema con la dirección de envío.
-     * @throws ProductException si hay un problema con la disponibilidad del producto.
+     * @throws ShippingAddressException si hay un problema con la dirección de
+     * envío.
+     * @throws ProductException si hay un problema con la disponibilidad del
+     * producto.
      */
     @Transactional(rollbackFor = Exception.class)
     @Override
     public QuotesDto addOrUpdateCartProduct(ShoppingCartItemDto shoppingCartItemRequest) throws ShippingAddressException, ProductException {
-      
-        if(shoppingCartItemRequest.quantity < 1){
-         throw  new ProductException( "ingresa cantidad valida para  añadir producto " );
+
+        if (shoppingCartItemRequest.quantity < 1) {
+            throw new ProductException("ingresa cantidad valida para  añadir producto ");
         }
         validateStockAvailability(shoppingCartItemRequest);
 
@@ -103,7 +105,6 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
         }
     }
 
-    
     /**
      * Añade un nuevo ítem al carrito de compras.
      *
@@ -113,7 +114,8 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
      * @param dbProduct la entidad del producto.
      * @param currentDateTime la fecha y hora actuales.
      * @return el DTO del carrito actualizado con los nuevos totales.
-     * @throws ShippingAddressException si hay un problema con la dirección de envío.
+     * @throws ShippingAddressException si hay un problema con la dirección de
+     * envío.
      */
     @Transactional(rollbackFor = Exception.class)
     private QuotesDto addNewItemToQuote(QuotesDto quotesDto, QuoteItemsDto quoteItemsDto, int quantity, Products dbProduct, Date currentDateTime) throws ShippingAddressException, ProductException {
@@ -129,14 +131,13 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
         quoteDtoWithTotals.setLineNumber(quotesDto.getLineNumber() + 1);
 
         Quotes quotesToUpdate = quotesMapper.quotesDtoToQuotes(quoteDtoWithTotals);
-        
+
         updateQuoteHeaderWithTotals(quotesToUpdate);
-        
+
         return quoteDtoWithTotals;
 
     }
 
-    
     /**
      * Actualiza un ítem existente en el carrito de compras.
      *
@@ -146,7 +147,8 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
      * @param currentDateTime la fecha y hora actuales.
      * @param quantity la cantidad del producto.
      * @return el DTO del carrito actualizado con los nuevos totales.
-     * @throws ShippingAddressException si hay un problema con la dirección de envío.
+     * @throws ShippingAddressException si hay un problema con la dirección de
+     * envío.
      */
     @Transactional(rollbackFor = Exception.class)
     private QuotesDto updateQuoteWithExististItem(QuotesDto quotesDto, QuoteItemsDto quoteItemsDto, Products dbProduct, Date currentDateTime, int quantity) throws ShippingAddressException, ProductException {
@@ -168,13 +170,12 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
         QuotesDto quoteDtoWithTotals = collectsQuoteTotalsService.quotesDto(updatedQuotesDto);
 
         Quotes quotesToUpdate = quotesMapper.quotesDtoToQuotes(quoteDtoWithTotals);
-        
+
         updateQuoteHeaderWithTotals(quotesToUpdate);
-        
+
         return quoteDtoWithTotals;
     }
 
-    
     /**
      * Comprueba si un ítem ya existe en el carrito de compras.
      *
@@ -189,7 +190,6 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
         return existingItemOptional.isPresent();
     }
 
-    
     /**
      * Valida la disponibilidad de stock para el producto solicitado.
      *
@@ -205,7 +205,6 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
         }
     }
 
-    
     /**
      * Configura la clave primaria de un ítem del carrito de compras.
      *
@@ -223,12 +222,11 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
         return quoteItemsPKDto;
     }
 
-    
-    private void updateQuoteHeaderWithTotals(Quotes quotesDto){
+    private void updateQuoteHeaderWithTotals(Quotes quotesDto) {
         Quotes quoteUpdate = quotesDto;
         quoteUpdate.setQuoteIncentiveItemsCollection(null);
         quoteUpdate.setQuoteItemsCollection(null);
         quoteUpdate.setQuoteTotalsCollection(null);
-        quotesService.save(quoteUpdate);        
+        quotesService.save(quoteUpdate);
     }
 }

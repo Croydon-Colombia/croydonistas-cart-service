@@ -14,6 +14,7 @@
 package com.croydon.configuration;
 
 import com.croydon.Infrastructure.service.implementation.OAuthServiceImpl;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -27,18 +28,24 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 public class AppConfig {
     
+    @Value("${apex_base_uri}")
+    private String apexBaseUri;
+    
+    @Value("${jde_stock_auth}")
+    private String stockAuth;
+    
     @Bean
     public WebClient webClient() {
         return WebClient.builder()
-                .baseUrl("https://trapirest.croydonjde.com.co/ords/api/")
-                .defaultHeader("Authorization", "Basic Q1JPWURPTlJFU1Q6Q3IweWQwbiR3M2I=")
+                .baseUrl(apexBaseUri)
+                .defaultHeader("Authorization", "Basic " + stockAuth)
                 .build();
     }
 
     @Bean
     public WebClient oAuthWebClient(OAuthServiceImpl oAuthService) {
         return WebClient.builder()
-                .baseUrl("https://trapirest.croydonjde.com.co/ords/api/")
+                .baseUrl(apexBaseUri)
                 .filter((request, next) -> oAuthService.getAccessToken()
                 .flatMap(token -> {
                     ClientRequest newRequest = ClientRequest.from(request)

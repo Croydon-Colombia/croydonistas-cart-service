@@ -24,9 +24,10 @@ import reactor.core.publisher.Mono;
 
 /**
  * Cliente para obtener el stock de un producto en una ubicación específica.
- * 
+ *
  * Esta clase implementa la interfaz IStockClient y proporciona métodos para
- * recuperar el stock de un producto en una ubicación específica utilizando un servicio web externo.
+ * recuperar el stock de un producto en una ubicación específica utilizando un
+ * servicio web externo.
  *
  * @author Edwin Torres - Email: edwin.torres@croydon.com.co
  */
@@ -37,7 +38,6 @@ public class StockClientImpl implements IStockClient {
 
     private final WebClient webClient;
 
-    
     /**
      * Constructor de la clase StockClientImpl.
      *
