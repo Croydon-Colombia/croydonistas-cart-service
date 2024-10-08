@@ -59,7 +59,7 @@ public class CatalogProducts {
     public Date updatedAt;
 
     @Lob
-    @Column(name = "meta_description")
+    @Column(name = "meta_description",columnDefinition = "LONGTEXT")
     public String metaDescription;
 
     @Column(name = "meta_keywords")
@@ -83,7 +83,7 @@ public class CatalogProducts {
     public String baseImage;
 
     @Lob
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "LONGTEXT")
     public String description;
 
     @Column(name = "final_max_price")
@@ -105,15 +105,15 @@ public class CatalogProducts {
     public Double minSpecialPrice;
 
     @Lob
-    @Column(name = "search_terms")
+    @Column(name = "search_terms",columnDefinition = "LONGTEXT")
     public String searchTerms;
 
     @Lob
-    @Column(name = "search_terms_string")
+    @Column(name = "search_terms_string",columnDefinition = "LONGTEXT")
     public String searchTermsString;
 
     @Lob
-    @Column(name = "short_description")
+    @Column(name = "short_description", columnDefinition = "LONGTEXT")
     public String shortDescription;
 
     @Column(name = "tax_percent")
