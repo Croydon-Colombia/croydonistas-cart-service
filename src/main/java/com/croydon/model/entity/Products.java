@@ -59,7 +59,7 @@ public class Products {
     public Date updatedAt;
 
     @Lob
-    @Column(name = "meta_description")
+    @Column(name = "meta_description",columnDefinition = "LONGTEXT")
     public String metaDescription;
 
     @Column(name = "meta_keywords")
@@ -90,7 +90,7 @@ public class Products {
     public Double customerDiscount;
 
     @Lob
-    @Column(name = "description")
+    @Column(name = "description",columnDefinition = "LONGTEXT")
     public String description;
 
     @Column(name = "employee_discount")
@@ -135,7 +135,7 @@ public class Products {
     public String searchTerms;
 
     @Lob
-    @Column(name = "short_description")
+    @Column(name = "short_description",columnDefinition = "LONGTEXT")
     public String shortDescription;
 
     @Column(name = "special_price")
