@@ -1,0 +1,13 @@
+services:
+  croydonistas-cart-service:
+    image: croydonistas-cart-service
+    container_name: croydonistas-cart-service
+    ports:
+      - "8082:8082"
+    environment:
+      DB_URL: "jdbc:mysql://30.0.0.8:3306/croydonistas_jde?useSSL=false"
+      DB_USERNAME: "dbadmin"
+      DB_PASSWORD: "Cr0yd0n2024!"
+      JDE_OAUTH_TOKEN: "NWstMWJtWWlMcXViUlE2OXBsUEVzQS4uOmNzMV9PNzlDeEZZZUY5cXVJWUNkVHcuLg=="
+      APEX_BASE_URI: "https://apexjdenp.croydonerp.com:25443/ords/api/"
+      JDE_STOCK_AUTH: "Q1JPWURPTlJFU1Q6Q3JveWRvbi4yMDI0"
