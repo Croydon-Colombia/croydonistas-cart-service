@@ -1,6 +1,4 @@
-/*
- * Licencia de Software para Croydon Colombia
- *
+ /*
  * Copyright (c) 2024 Croydon Colombia
  *
  * Este programa es software propietario de Croydon Colombia.
@@ -11,18 +9,27 @@
  * El uso de este software implica la aceptación de los términos y condiciones establecidos.
  *
  */
-package com.croydon.model.dao;
+package com.croydon.model.dto;
 
-import com.croydon.model.entity.Customers;
-import java.util.Optional;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
+import java.util.Date;
+import lombok.Data;
 
 /**
  *
- * @author Edwin Torres - Email: edwin.torres@croydon.com.co
+ *  @author Jose-jose.rivera@croydon.com.co
  */
-public interface CustomersDao extends CrudRepository<Customers, String> {
+@Data
+public class CustomerTokenDto {
     
-    Optional<Customers> findByDocumentNumber(@Param("documentNumber") String documentNumber);
+    private Long id;
+    private Date createdAt;
+    private Date updatedAt;
+    private String device;
+    private String deviceName;
+    private boolean enabled;
+    private String ip;
+    private String token;
+    private String userAgent;
+    private String userAgentName;
+    private String customerId;     
 }

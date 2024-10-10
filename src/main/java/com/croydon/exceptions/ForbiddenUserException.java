@@ -11,18 +11,16 @@
  * El uso de este software implica la aceptación de los términos y condiciones establecidos.
  *
  */
-package com.croydon.model.dao;
+package com.croydon.exceptions;
 
-import com.croydon.model.entity.Customers;
-import java.util.Optional;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  *
- * @author Edwin Torres - Email: edwin.torres@croydon.com.co
+ * *  @author Jose-jose.rivera@croydon.com.co
  */
-public interface CustomersDao extends CrudRepository<Customers, String> {
+@ResponseStatus(code = HttpStatus.FORBIDDEN, reason = "Forbidden")
+public class ForbiddenUserException extends RuntimeException {
     
-    Optional<Customers> findByDocumentNumber(@Param("documentNumber") String documentNumber);
 }
