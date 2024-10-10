@@ -54,12 +54,11 @@ public class QuoteController {
     @Autowired
     private CustomerAuth customerAuth;
 
-    @GetMapping("quotes/customer/{customerId}")
-    public ResponseEntity<ApiResponse<QuotesDto>> findQuotesByClientId(@PathVariable("customerId") String customerId) {
+    @GetMapping("quotes/customer")
+    public ResponseEntity<ApiResponse<QuotesDto>> findQuotesByClientId(@RequestParam("customerId") String customerId) {
         try {
             // Obtener el cliente autenticado usando CustomerAuth
             var customer = customerAuth.get();
-
             QuotesDto response = shoppingCartManagerService.getOrCreateCart(customerId);
             return ResponseEntity.ok(new ApiResponse<>(response, "Success", null));
         } catch (DataException ex) {
