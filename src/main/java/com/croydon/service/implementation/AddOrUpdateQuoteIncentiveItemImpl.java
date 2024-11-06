@@ -168,7 +168,7 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
     */
     private void updateIncentiveItem(QuoteIncentiveItemsDto existingItem, QuoteIncentiveItemsDto newItem) {
         existingItem.setQty(newItem.getQty());
-        existingItem.setTotal(newItem.getTotal());     
+        existingItem.setTotal(newItem.getTotal());
     }
 
     /**
@@ -275,14 +275,18 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
                 .equals(quoteIncentiveItemsDto.getQuoteIncentiveItemsPK()))
                 .findFirst()
                 .get();
-
+        if (shoppingCartItemRequest.getIsUpdateOnly() == true) {
+            existingItemExist.setQty(shoppingCartItemRequest.getQuantity());
+            existingItemExist.setTotal(existingItemExist.getIncentives() * shoppingCartItemRequest.getQuantity());
+        } else {
+            existingItemExist.setQty(existingItemExist.getQty() + shoppingCartItemRequest.getQuantity());
+            existingItemExist.setTotal(existingItemExist.getIncentives() * existingItemExist.getQty());
+        }
         quotesDto.getQuoteIncentiveItemsCollection()
                 .removeIf(item -> item.getQuoteIncentiveItemsPK()
                 .equals(existingItemExist.getQuoteIncentiveItemsPK()));
 
         existingItemExist.setUpdatedAt(currentDate);
-        existingItemExist.setQty(existingItemExist.getQty() + shoppingCartItemRequest.getQuantity());
-        existingItemExist.setTotal(existingItemExist.getIncentives() * existingItemExist.getQty());
 
         quotesDto.getQuoteIncentiveItemsCollection().add(existingItemExist);
 
@@ -325,8 +329,13 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
 
             int originalQty = existingItem.getQty();
             double originalTotal = existingItem.getTotal();
-            existingItem.setQty(existingItem.getQty() + shoppingCartItemRequest.getQuantity());
-            existingItem.setTotal(existingItem.getIncentives() * existingItem.getQty());
+            if (shoppingCartItemRequest.getIsUpdateOnly() == true) {
+                existingItem.setQty(shoppingCartItemRequest.getQuantity());
+                existingItem.setTotal(existingItem.getIncentives() * shoppingCartItemRequest.getQuantity());
+            } else {
+                existingItem.setQty(existingItem.getQty() + shoppingCartItemRequest.getQuantity());
+                existingItem.setTotal(existingItem.getIncentives() * existingItem.getQty());
+            }
 
             incentiveOperationsService.isIncentiveUpdateSumValid(quotesDto, dbProduct, shoppingCartItemRequest, incentiveBalance.getIncentivoDisponible());
 

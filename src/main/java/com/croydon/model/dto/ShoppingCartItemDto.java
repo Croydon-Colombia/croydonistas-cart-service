@@ -35,4 +35,7 @@ public class ShoppingCartItemDto {
     
     public int quantity;
     
+    // Campo opcional para indicar si es solo actualización (puede ser null)
+    private Boolean isUpdateOnly = false;
+    
 }

@@ -99,7 +99,7 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
         quoteItemsDto.setQuoteItemsPK(setQuoteItemsPKDto(quotesDto, dbProduct));
 
         if (existingItem(quotesDto, quoteItemsDto)) {
-            return updateQuoteWithExististItem(quotesDto, quoteItemsDto, dbProduct, currentDateTime, shoppingCartItemRequest.getQuantity());
+            return updateQuoteWithExististItem(quotesDto, quoteItemsDto, dbProduct, currentDateTime, shoppingCartItemRequest.getQuantity(), shoppingCartItemRequest.getIsUpdateOnly());
         } else {
             return addNewItemToQuote(quotesDto, quoteItemsDto, shoppingCartItemRequest.quantity, dbProduct, currentDateTime);
         }
@@ -151,17 +151,20 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
      * envío.
      */
     @Transactional(rollbackFor = Exception.class)
-    private QuotesDto updateQuoteWithExististItem(QuotesDto quotesDto, QuoteItemsDto quoteItemsDto, Products dbProduct, Date currentDateTime, int quantity) throws ShippingAddressException, ProductException {
+    private QuotesDto updateQuoteWithExististItem(QuotesDto quotesDto, QuoteItemsDto quoteItemsDto, Products dbProduct, Date currentDateTime, int quantity, boolean isUpdateOnly) throws ShippingAddressException, ProductException {
 
         quotesDto.setUpdatedAt(currentDateTime);
 
         QuoteItemsDto existingItemExist = quotesDto.getQuoteItemsCollection().stream()
                 .filter(item -> item.getQuoteItemsPK().equals(quoteItemsDto.getQuoteItemsPK()))
                 .findFirst().get();
+        if (isUpdateOnly == true) {
+            existingItemExist.setQty(quantity);
+        } else {
+            existingItemExist.setQty(existingItemExist.getQty() + quantity);
 
-        existingItemExist.setQty(existingItemExist.getQty() + quantity);
+        }
         existingItemExist.setUpdatedAt(currentDateTime);
-
         quotesDto.getQuoteItemsCollection()
                 .removeIf(item -> item.getQuoteItemsPK()
                 .equals(quoteItemsDto.getQuoteItemsPK()));
