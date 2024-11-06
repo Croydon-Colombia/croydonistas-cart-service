@@ -159,7 +159,7 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
                 .filter(item -> item.getQuoteItemsPK().equals(quoteItemsDto.getQuoteItemsPK()))
                 .findFirst().get();
 
-        existingItemExist.setQty(quantity);
+        existingItemExist.setQty(existingItemExist.getQty() + quantity);
         existingItemExist.setUpdatedAt(currentDateTime);
 
         quotesDto.getQuoteItemsCollection()

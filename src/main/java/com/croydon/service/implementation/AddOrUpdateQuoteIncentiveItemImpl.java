@@ -281,8 +281,8 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
                 .equals(existingItemExist.getQuoteIncentiveItemsPK()));
 
         existingItemExist.setUpdatedAt(currentDate);
-        existingItemExist.setQty(shoppingCartItemRequest.getQuantity());
-        existingItemExist.setTotal(existingItemExist.getIncentives() * shoppingCartItemRequest.getQuantity());
+        existingItemExist.setQty(existingItemExist.getQty() + shoppingCartItemRequest.getQuantity());
+        existingItemExist.setTotal(existingItemExist.getIncentives() * existingItemExist.getQty());
 
         quotesDto.getQuoteIncentiveItemsCollection().add(existingItemExist);
 
@@ -325,8 +325,8 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
 
             int originalQty = existingItem.getQty();
             double originalTotal = existingItem.getTotal();
-            existingItem.setQty(shoppingCartItemRequest.getQuantity());
-            existingItem.setTotal(existingItem.getIncentives() * shoppingCartItemRequest.getQuantity());
+            existingItem.setQty(existingItem.getQty() + shoppingCartItemRequest.getQuantity());
+            existingItem.setTotal(existingItem.getIncentives() * existingItem.getQty());
 
             incentiveOperationsService.isIncentiveUpdateSumValid(quotesDto, dbProduct, shoppingCartItemRequest, incentiveBalance.getIncentivoDisponible());
 

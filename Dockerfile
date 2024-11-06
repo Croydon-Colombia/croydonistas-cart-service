@@ -12,7 +12,6 @@
  #
 
 # Usar una imagen base de Maven con OpenJDK 21 para compilar la aplicación
-# Etapa 1: Construcción de la aplicación con Maven y OpenJDK 21
 FROM maven:3.9.4-eclipse-temurin-21 AS build
 
 # Establecer el directorio de trabajo en el contenedor
@@ -26,7 +25,7 @@ RUN mvn dependency:go-offline -B
 COPY src ./src
 RUN mvn clean package -DskipTests
 
-# Etapa 2: Crear la imagen final con el JDK de OpenJDK 21 para ejecutar la aplicación
+# Establecer el JDK de OpenJDK 21 para ejecutar la aplicación
 FROM eclipse-temurin:21-jdk-jammy
 
 # Establecer el directorio de trabajo en el contenedor
@@ -39,6 +38,7 @@ COPY --from=build /app/target/croydonistas-cart-service-0.0.1-SNAPSHOT.jar /app/
 EXPOSE 8082
 
 # Comando para ejecutar la aplicación
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+ENV JAVA_OPTS="-Xmx3g -Xms256m -XX:+UseG1GC"
+ENTRYPOINT ["java", "-Xms256m", "-Xmx3g", "-XX:+UseG1GC", "-XX:+HeapDumpOnOutOfMemoryError", "-XX:+ExitOnOutOfMemoryError", "-jar", "/app/app.jar"]
 
 
