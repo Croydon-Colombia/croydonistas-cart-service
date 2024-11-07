@@ -102,7 +102,7 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
 
         setQuoteIncentiveItemsPK(quotesDto, shoppingCartItemRequest, quoteIncentiveItemsDto, dbProduct);
 
-        boolean itemExists = existingItem(quotesDto, quoteIncentiveItemsDto);
+        boolean itemExists = existingItem(quotesDto, quoteIncentiveItemsDto, shoppingCartItemRequest.getIsUpdateOnly());
 
         validateAndUpdateIncentiveItem(quotesDto, shoppingCartItemRequest, dbProduct, quoteIncentiveItemsDto, itemExists, incentiveBalance);
 
@@ -147,11 +147,13 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
      * @return true si el producto ya existe en el carrito, false de lo
      * contrario.
      */
-    private boolean existingItem(QuotesDto quotesDto, QuoteIncentiveItemsDto quoteItemsDto) {
+    private boolean existingItem(QuotesDto quotesDto, QuoteIncentiveItemsDto quoteItemsDto, boolean isUpdateOnly) {
         Optional<QuoteIncentiveItemsDto> existingItemOptional = quotesDto.getQuoteIncentiveItemsCollection().stream()
                 .filter(item -> item.getQuoteIncentiveItemsPK().equals(quoteItemsDto.getQuoteIncentiveItemsPK()))
                 .findFirst();
-        if (existingItemOptional.isPresent()) {
+        if (existingItemOptional.isPresent() && isUpdateOnly == false) {
+            return true;
+        } else if (existingItemOptional.isPresent() && isUpdateOnly == true) {
             // Actualizar los datos del ítem existente con los del ítem proporcionado
             QuoteIncentiveItemsDto existingItem = existingItemOptional.get();
             updateIncentiveItem(existingItem, quoteItemsDto);
@@ -161,11 +163,16 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
         return false;
         // return existingItemOptional.isPresent();
     }
+
     /**
-    * Actualiza las cantidades y totales de un ítem de incentivo existente con los valores de un nuevo ítem de incentivo.
-    * @param existingItem El ítem de incentivo existente que se va a actualizar.
-    * @param newItem El nuevo ítem de incentivo que proporciona los valores actualizados.
-    */
+     * Actualiza las cantidades y totales de un ítem de incentivo existente con
+     * los valores de un nuevo ítem de incentivo.
+     *
+     * @param existingItem El ítem de incentivo existente que se va a
+     * actualizar.
+     * @param newItem El nuevo ítem de incentivo que proporciona los valores
+     * actualizados.
+     */
     private void updateIncentiveItem(QuoteIncentiveItemsDto existingItem, QuoteIncentiveItemsDto newItem) {
         existingItem.setQty(newItem.getQty());
         existingItem.setTotal(newItem.getTotal());

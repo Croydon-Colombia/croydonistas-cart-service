@@ -75,7 +75,8 @@ public class IncentiveOperationsImpl implements IIncentiveOperations {
     public void isIncentiveUpdateSumValid(QuotesDto quotesDto, Products dbProduct, ShoppingCartItemDto shoppingCartItemRequest, double incentiveBalance) throws IncentiveProductException {
          double totalRedeemedPoints = calculateTotalRedeemedPoints(quotesDto);
           if (totalRedeemedPoints > incentiveBalance) {
-            throw new IncentiveProductException("Cupo de incentivos: " + incentiveBalance + ". Solicitado: " + totalRedeemedPoints);
+            System.out.println("Cupo de incentivos: " + incentiveBalance + ". Solicitado: " + totalRedeemedPoints);
+            throw new IncentiveProductException("Alcanzo el limite de incentivos disponibles" );
         }
     }
 
