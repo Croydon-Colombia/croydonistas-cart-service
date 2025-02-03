@@ -39,6 +39,6 @@ EXPOSE 8082
 
 # Comando para ejecutar la aplicación
 ENV JAVA_OPTS="-Xmx3g -Xms256m -XX:+UseG1GC"
-ENTRYPOINT ["java", "-Xms256m", "-Xmx3g", "-XX:+UseG1GC", "-XX:+HeapDumpOnOutOfMemoryError", "-XX:+ExitOnOutOfMemoryError", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java", "-Xms256m", "-Xmx2g", "-XX:+UseG1GC", "-XX:+HeapDumpOnOutOfMemoryError", "-XX:+ExitOnOutOfMemoryError", "-jar", "/app/app.jar"]
 
 

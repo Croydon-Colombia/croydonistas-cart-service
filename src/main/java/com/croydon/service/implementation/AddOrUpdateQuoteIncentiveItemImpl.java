@@ -15,6 +15,8 @@ package com.croydon.service.implementation;
 
 import com.croydon.Infrastructure.service.IInsentiveBalanceClient;
 import com.croydon.Infrastructure.dto.IncentiveBalanceResponse;
+import com.croydon.Infrastructure.dto.StockResponse;
+import com.croydon.Infrastructure.service.IStockClient;
 import com.croydon.exceptions.IncentiveProductException;
 import com.croydon.exceptions.ProductException;
 import com.croydon.mappers.ProductsToQuotesItemsIncentiveMapper;
@@ -27,14 +29,18 @@ import com.croydon.model.dto.QuotesDto;
 import com.croydon.model.dto.ShoppingCartItemDto;
 import com.croydon.model.entity.Products;
 import com.croydon.model.entity.Quotes;
+import com.croydon.model.entity.RequestsWithoutInventory;
 import com.croydon.service.IAddOrUpdateQuoteIncentiveItem;
 import com.croydon.service.IIncentiveOperations;
 import com.croydon.service.IProducts;
 import com.croydon.service.IQuoteIncentiveItems;
 import com.croydon.service.IQuotes;
+import com.croydon.service.IRequestsWithoutInventory;
 import com.croydon.utilities.DateUtils;
+import java.text.MessageFormat;
 import java.util.Date;
 import java.util.Optional;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,6 +55,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncentiveItem {
 
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(AddOrUpdateQuoteIncentiveItemImpl.class);
+    
     @Autowired
     private IInsentiveBalanceClient insentiveBalanceClient;
 
@@ -72,6 +80,12 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
 
     @Autowired
     private QuoteIncentiveItemsMapper quoteIncentiveItemsMapper;
+    
+    @Autowired
+    private IStockClient stockClient;
+    
+    @Autowired
+    private IRequestsWithoutInventory requestsWithoutInventoryService;
 
     /**
      * Agrega o actualiza un producto de incentivo en el carrito de compras.
@@ -89,9 +103,13 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
     public QuotesDto addOrUpdateCartIncentiveItem(ShoppingCartItemDto shoppingCartItemRequest) throws IncentiveProductException, ProductException {
 
         validateQuantity(shoppingCartItemRequest.getQuantity());
-        Date currentDate = DateUtils.getCurrentDate();
-
+        
         Quotes dbQuotes = quotesService.findByQuotesId(shoppingCartItemRequest.quotes_id);
+        
+        validateStockAvailability(dbQuotes, shoppingCartItemRequest);
+        
+        Date currentDate = DateUtils.getCurrentDate();        
+
         QuotesDto quotesDto = quotesMapper.quotesToQuotesDto(dbQuotes);
         IncentiveBalanceResponse incentiveBalance = validateIncentiveBalance(quotesDto.getCustomersId());
 
@@ -273,7 +291,9 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
      * @return el DTO de la cotización actualizada.
      */
     @Transactional(rollbackFor = Exception.class)
-    private QuotesDto updateQuoteWithExistingIncentiveItem(QuotesDto quotesDto, QuoteIncentiveItemsDto quoteIncentiveItemsDto, Date currentDate, ShoppingCartItemDto shoppingCartItemRequest) {
+    private QuotesDto updateQuoteWithExistingIncentiveItem(
+            QuotesDto quotesDto, QuoteIncentiveItemsDto quoteIncentiveItemsDto, 
+            Date currentDate, ShoppingCartItemDto shoppingCartItemRequest) {
 
         quotesDto.setUpdatedAt(currentDate);
 
@@ -350,6 +370,44 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
             existingItem.setTotal(originalTotal);
         } else {
             incentiveOperationsService.isIncentiveSumValid(quotesDto, dbProduct, shoppingCartItemRequest, incentiveBalance.getIncentivoDisponible());
+        }
+    }
+    
+    /**
+     * Valida la disponibilidad de stock para el producto solicitado.
+     *
+     * @param shoppingCartItemRequest el producto que se desea validar.
+     * @throws ProductException si no hay suficiente stock disponible.
+     */
+    private void validateStockAvailability(Quotes dbQuotes, ShoppingCartItemDto shoppingCartItemRequest) throws ProductException {
+        StockResponse stockResponse = stockClient.getStock(shoppingCartItemRequest.productSku, "CP001").block();
+        if (stockResponse.getQty() < shoppingCartItemRequest.getQuantity()) {
+            saveRequestsWithoutInventory(dbQuotes, shoppingCartItemRequest, stockResponse.qty);
+            throw new ProductException(
+                    MessageFormat.format("Cantidad solicitada {0}, disponible {1}", shoppingCartItemRequest.quantity, stockResponse.qty)
+            );
+        }
+    }
+    
+    
+    private void saveRequestsWithoutInventory(Quotes dbQuotes, ShoppingCartItemDto shoppingCartItemRequest, int stockResponse) {
+        try {
+            RequestsWithoutInventory requestsWithoutInventory = new RequestsWithoutInventory();
+
+            requestsWithoutInventory.setCustomerId(dbQuotes.getCustomersId().getId());
+            requestsWithoutInventory.setSku(shoppingCartItemRequest.productSku);
+            requestsWithoutInventory.setQtyRequests(shoppingCartItemRequest.quantity);
+            requestsWithoutInventory.setQtyAvailable(stockResponse);
+            requestsWithoutInventory.setProductType("incentive");
+            requestsWithoutInventory.setQuotesId(dbQuotes.id);
+            requestsWithoutInventory.setEventType("shopping_cart");
+            requestsWithoutInventory.setCreatedAt(new Date()); // Fecha y hora actual
+            requestsWithoutInventory.setReported(false);
+
+            requestsWithoutInventoryService.save(requestsWithoutInventory);
+
+        } catch (Exception e) {
+            logger.error("Error at RequestsWithoutInventory: " + e.getMessage());
         }
     }
 }

@@ -25,6 +25,7 @@ import com.croydon.model.dto.QuotesDto;
 import com.croydon.model.dto.ShoppingCartItemDto;
 import com.croydon.model.entity.Products;
 import com.croydon.model.entity.Quotes;
+import com.croydon.model.entity.RequestsWithoutInventory;
 import com.croydon.service.IAddQuoteItem;
 import com.croydon.service.ICollectsQuoteTotals;
 import com.croydon.service.IProducts;
@@ -36,6 +37,8 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.croydon.service.IAddOrUpdateQuoteItem;
+import com.croydon.service.IRequestsWithoutInventory;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -47,6 +50,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
 
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(AddOrUpdateQuoteItemImpl.class);
+    
     @Autowired
     private IStockClient stockClient;
 
@@ -68,6 +73,9 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
     @Autowired
     private QuotesMapper quotesMapper;
 
+    @Autowired
+    private IRequestsWithoutInventory requestsWithoutInventoryService;
+
     /**
      * Agrega o actualiza un producto en el carrito de compras.
      *
@@ -86,12 +94,13 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
         if (shoppingCartItemRequest.quantity < 1) {
             throw new ProductException("ingresa cantidad valida para  añadir producto ");
         }
-        validateStockAvailability(shoppingCartItemRequest);
+        Quotes dbQuotes = quotesService.findByQuotesId(shoppingCartItemRequest.quotes_id);
+
+        validateStockAvailability(shoppingCartItemRequest, dbQuotes);
 
         Date currentDateTime = DateUtils.getCurrentDate();
 
         Products dbProduct = productsComponent.findProductById(shoppingCartItemRequest.productSku);
-        Quotes dbQuotes = quotesService.findByQuotesId(shoppingCartItemRequest.quotes_id);
 
         QuoteItemsDto quoteItemsDto = productsToQuotesItemsMapper.ProductsToQuoteItemsDto(dbProduct);
         QuotesDto quotesDto = quotesMapper.quotesToQuotesDto(dbQuotes);
@@ -199,12 +208,34 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
      * @param shoppingCartItemRequest el producto que se desea validar.
      * @throws ProductException si no hay suficiente stock disponible.
      */
-    private void validateStockAvailability(ShoppingCartItemDto shoppingCartItemRequest) throws ProductException {
+    private void validateStockAvailability(ShoppingCartItemDto shoppingCartItemRequest, Quotes dbQuotes) throws ProductException {
         StockResponse stockResponse = stockClient.getStock(shoppingCartItemRequest.productSku, "CP001").block();
         if (stockResponse.getQty() < shoppingCartItemRequest.getQuantity()) {
+            saveRequestsWithoutInventory(dbQuotes, shoppingCartItemRequest, stockResponse.qty);
             throw new ProductException(
                     MessageFormat.format("Cantidad solicitada {0}, disponible {1}", shoppingCartItemRequest.quantity, stockResponse.qty)
             );
+        }
+    }
+
+    private void saveRequestsWithoutInventory(Quotes dbQuotes, ShoppingCartItemDto shoppingCartItemRequest, int stockResponse) {
+        try {
+            RequestsWithoutInventory requestsWithoutInventory = new RequestsWithoutInventory();
+
+            requestsWithoutInventory.setCustomerId(dbQuotes.getCustomersId().getId());
+            requestsWithoutInventory.setSku(shoppingCartItemRequest.productSku);
+            requestsWithoutInventory.setQtyRequests(shoppingCartItemRequest.quantity);
+            requestsWithoutInventory.setQtyAvailable(stockResponse);
+            requestsWithoutInventory.setProductType("product");
+            requestsWithoutInventory.setQuotesId(dbQuotes.id);
+            requestsWithoutInventory.setEventType("shopping_cart");
+            requestsWithoutInventory.setCreatedAt(new Date()); // Fecha y hora actual
+            requestsWithoutInventory.setReported(false);
+
+            requestsWithoutInventoryService.save(requestsWithoutInventory);
+
+        } catch (Exception e) {
+            logger.error("Error at RequestsWithoutInventory: " + e.getMessage());
         }
     }
 
