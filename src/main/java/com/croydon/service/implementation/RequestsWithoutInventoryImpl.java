@@ -18,6 +18,8 @@ import com.croydon.model.entity.RequestsWithoutInventory;
 import com.croydon.service.IRequestsWithoutInventory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  *
@@ -30,6 +32,7 @@ public class RequestsWithoutInventoryImpl implements IRequestsWithoutInventory {
     private RequestsWithoutInventoryDao service;
     
     @Override
+   @Transactional(propagation = Propagation.REQUIRES_NEW)
     public RequestsWithoutInventory save(RequestsWithoutInventory requestsWithoutInventory) {
         return service.save(requestsWithoutInventory);
     }
