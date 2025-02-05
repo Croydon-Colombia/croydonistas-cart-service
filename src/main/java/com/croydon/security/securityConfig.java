@@ -16,11 +16,12 @@ package com.croydon.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 /**
  *
@@ -28,29 +29,38 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  */
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class securityConfig {
 
     @Autowired
-    private CustomerAuth customerAuth;
-    @Autowired
-    private AuthEntryPointJwt unauthorizedHandler;
-    @Autowired
-    private AuthenticationTokenFilter authTokenFilter;
+    private JwtAuthenticationConverter jwtAuthenticationConverter;
 
-    // Configuración de la seguridad HTTP
+    /**
+     * Configura la seguridad HTTP de la aplicación.
+     *
+     * - Habilita CORS con la configuración proporcionada. - Desactiva CSRF
+     * (útil cuando se usa autenticación basada en tokens). - Exige
+     * autenticación para todas las solicitudes. - Configura el servidor de
+     * recursos OAuth2 para autenticación mediante JWT. - Establece la gestión
+     * de sesión como STATELESS (sin estado).
+     *
+     * @param httpSecurity Configuración de seguridad HTTP.
+     * @param corsConfigurationSource Configuración de CORS para controlar
+     * accesos desde otros dominios.
+     * @return SecurityFilterChain con la configuración de seguridad aplicada.
+     * @throws Exception Si ocurre algún error durante la configuración.
+     */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.cors().and().csrf().disable() // Desactiva CORS y CSRF (si no es necesario)
-                .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and() // Manejo de excepciones no autorizadas
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and() // Sesiones sin estado (JWT)
-                .authorizeRequests()
-                .requestMatchers("/shopping-cart/v1/**").authenticated() // Rutas que requieren autenticación
-                .anyRequest().permitAll();  // El resto de las rutas permiten acceso sin autenticación
-
-        // Añadir el filtro antes del filtro de autenticación por defecto
-        http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
-
-        return http.build();
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity, CorsConfigurationSource corsConfigurationSource) throws Exception {
+        return httpSecurity
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
+                .csrf(csrf -> csrf.disable()) // Desactiva CORS y CSRF (si no es necesario)            
+                .authorizeHttpRequests(http -> http.anyRequest().authenticated())
+                .oauth2ResourceServer(oaut -> {
+                    oaut.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter));
+                })
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .build();
     }
 
 }
