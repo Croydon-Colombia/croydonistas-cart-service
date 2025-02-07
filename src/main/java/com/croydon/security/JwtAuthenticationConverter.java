@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -15,6 +16,7 @@ import org.springframework.security.oauth2.jwt.JwtClaimNames;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  *
@@ -105,5 +107,17 @@ public class JwtAuthenticationConverter implements Converter<Jwt, AbstractAuthen
         }
 
         return jwt.getClaim(claimName);
+    }
+
+   public void validateCustomerAccess(Jwt jwt, String customerIdFromQuote) throws Exception {
+        String authenticatedCustomerId = getAuthenticatedCustomerId(jwt);
+        if (!authenticatedCustomerId.equals(customerIdFromQuote)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No estás autorizado para realizar esta acción");
+        }
+    }
+    
+    private String getAuthenticatedCustomerId(Jwt jwt) {
+        
+        return  jwt.getClaim("given_name");
     }
 }

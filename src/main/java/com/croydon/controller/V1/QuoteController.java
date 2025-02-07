@@ -28,6 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -53,9 +55,14 @@ public class QuoteController {
     private IShoppingCartManager shoppingCartManagerService;
 
     @GetMapping("quotes/customer")
-    public ResponseEntity<ApiResponse<QuotesDto>> findQuotesByClientId(@RequestParam("customerId") String customerId) {
+    public ResponseEntity<ApiResponse<QuotesDto>> findQuotesByClientId(@RequestParam("customerId") String customerId,@AuthenticationPrincipal Jwt jwt) {
         try {
-           
+            String authenticatedCustomerId = jwt.getClaim("given_name");
+            if(!authenticatedCustomerId.equals(customerId)){
+              return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ApiResponse<>(null, "Unauthorized access", null));
+            }
+            
             QuotesDto response = shoppingCartManagerService.getOrCreateCart(customerId);
             return ResponseEntity.ok(new ApiResponse<>(response, "Success", null));
         } catch (DataException ex) {
@@ -66,9 +73,9 @@ public class QuoteController {
     }
 
     @PostMapping("quotes/delete")
-    public ResponseEntity<ApiResponse<QuotesDto>> deleteQuote(@RequestParam("quotesId") Long quotesId) {
+    public ResponseEntity<ApiResponse<QuotesDto>> deleteQuote(@RequestParam("quotesId") Long quotesId , @AuthenticationPrincipal Jwt jwt) {
         try {
-             shoppingCartManagerService.deleteQuote(quotesId);
+             shoppingCartManagerService.deleteQuote(quotesId ,jwt);
             return ResponseEntity.ok(new ApiResponse<>(null, "Carrito de compras: " + quotesId + ", Eliminado!", null));
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -77,9 +84,9 @@ public class QuoteController {
     }
 
     @PostMapping("products/add-or-update")
-    public ResponseEntity<ApiResponse<QuotesDto>> addProduct(@Valid @RequestBody ShoppingCartItemDto itemsRequest) {
+    public ResponseEntity<ApiResponse<QuotesDto>> addProduct(@Valid @RequestBody ShoppingCartItemDto itemsRequest,@AuthenticationPrincipal Jwt jwt) {
         try {
-            QuotesDto response = shoppingCartManagerService.addOrUpdateCartProduct(itemsRequest);
+            QuotesDto response = shoppingCartManagerService.addOrUpdateCartProduct(itemsRequest, jwt);
             return ResponseEntity.ok(new ApiResponse<>(response, "Success", null));
         } catch (ProductException | ShippingAddressException ex) {
             logger.error(ex.getMessage());
@@ -88,10 +95,10 @@ public class QuoteController {
     }
 
     @PostMapping("products/delete")
-    public ResponseEntity<ApiResponse<QuotesDto>> deleteProduct(@Valid @RequestBody ShoppingCartItemDto itemsRequest) {
+    public ResponseEntity<ApiResponse<QuotesDto>> deleteProduct(@Valid @RequestBody ShoppingCartItemDto itemsRequest, @AuthenticationPrincipal Jwt jwt) {
         try {
 
-            QuotesDto response = shoppingCartManagerService.deleteCartProduct(itemsRequest);
+            QuotesDto response = shoppingCartManagerService.deleteCartProduct(itemsRequest,jwt);
             return ResponseEntity.ok(new ApiResponse<>(response, "Success", null));
         } catch (ShippingAddressException ex) {
             logger.error(ex.getMessage());

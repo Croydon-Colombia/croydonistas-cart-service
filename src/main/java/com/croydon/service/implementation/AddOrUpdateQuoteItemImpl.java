@@ -26,6 +26,7 @@ import com.croydon.model.dto.ShoppingCartItemDto;
 import com.croydon.model.entity.Products;
 import com.croydon.model.entity.Quotes;
 import com.croydon.model.entity.RequestsWithoutInventory;
+import com.croydon.security.JwtAuthenticationConverter;
 import com.croydon.service.IAddQuoteItem;
 import com.croydon.service.ICollectsQuoteTotals;
 import com.croydon.service.IProducts;
@@ -38,7 +39,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.croydon.service.IAddOrUpdateQuoteItem;
 import com.croydon.service.IRequestsWithoutInventory;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -76,6 +80,7 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
     @Autowired
     private IRequestsWithoutInventory requestsWithoutInventoryService;
 
+    private JwtAuthenticationConverter jwtAth;
     /**
      * Agrega o actualiza un producto en el carrito de compras.
      *
@@ -89,12 +94,19 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
      */
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public QuotesDto addOrUpdateCartProduct(ShoppingCartItemDto shoppingCartItemRequest) throws ShippingAddressException, ProductException {
+    public QuotesDto addOrUpdateCartProduct(ShoppingCartItemDto shoppingCartItemRequest, Jwt jwt) throws ShippingAddressException, ProductException {
 
         if (shoppingCartItemRequest.quantity < 1) {
             throw new ProductException("ingresa cantidad valida para  añadir producto ");
         }
         Quotes dbQuotes = quotesService.findByQuotesId(shoppingCartItemRequest.quotes_id);
+        
+        try {
+            jwtAth.validateCustomerAccess(jwt, dbQuotes.getCustomersId().getId());
+        } catch (Exception ex) {
+            Logger.getLogger(AddOrUpdateQuoteItemImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
 
         validateStockAvailability(shoppingCartItemRequest, dbQuotes);
 

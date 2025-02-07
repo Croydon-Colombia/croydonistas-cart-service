@@ -21,6 +21,7 @@ import com.croydon.model.dto.ShoppingCartItemDto;
 import com.croydon.model.entity.Customers;
 import com.croydon.model.entity.QuoteItems;
 import com.croydon.model.entity.Quotes;
+import com.croydon.security.JwtAuthenticationConverter;
 import com.croydon.service.ICollectsQuoteTotals;
 import com.croydon.service.ICustomers;
 import com.croydon.service.INewQuotes;
@@ -33,7 +34,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.croydon.service.IAddOrUpdateQuoteItem;
 import com.croydon.service.IQuoteItems;
+import com.croydon.utilities.ApiResponse;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Implementación del servicio para la gestión del carrito de compras.
@@ -64,6 +72,9 @@ public class ShoppingCartManagerImpl implements IShoppingCartManager {
 
     @Autowired
     IQuoteItems quoteItemsService;
+    
+    @Autowired
+    private JwtAuthenticationConverter jwtConverter;
 
     /**
      * Obtiene o crea un carrito de compras para un cliente específico.
@@ -102,8 +113,8 @@ public class ShoppingCartManagerImpl implements IShoppingCartManager {
      * producto.
      */
     @Override
-    public QuotesDto addOrUpdateCartProduct(ShoppingCartItemDto shoppingCartItemRequest) throws ShippingAddressException, ProductException {
-        return addOrUpdateQuoteService.addOrUpdateCartProduct(shoppingCartItemRequest);
+    public QuotesDto addOrUpdateCartProduct(ShoppingCartItemDto shoppingCartItemRequest,Jwt jwt) throws ShippingAddressException, ProductException {
+        return addOrUpdateQuoteService.addOrUpdateCartProduct(shoppingCartItemRequest,jwt);
     }
 
     /**
@@ -117,12 +128,20 @@ public class ShoppingCartManagerImpl implements IShoppingCartManager {
      */
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public QuotesDto deleteCartProduct(ShoppingCartItemDto shoppingCartItemRequest) throws ShippingAddressException {
+    public QuotesDto deleteCartProduct(ShoppingCartItemDto shoppingCartItemRequest, Jwt jwt) throws ShippingAddressException {
         Date currentDateTime = DateUtils.getCurrentDate();
 
         Quotes dbQuotes = quotesService.findByQuotesId(shoppingCartItemRequest.quotes_id);
+        
+        try {
+            jwtConverter.validateCustomerAccess(jwt,dbQuotes.getCustomersId().getId());
+        } catch (Exception ex) {
+            Logger.getLogger(ShoppingCartManagerImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
         QuotesDto quotesDto = quotesMapper.quotesToQuotesDto(dbQuotes);
-
+       
+        
         QuoteItems itemToRemove = dbQuotes.getQuoteItemsCollection()
                 .stream()
                 .filter(item -> item.getQuoteItemsPK().getSku().equals(shoppingCartItemRequest.getProductSku()))
@@ -157,8 +176,11 @@ public class ShoppingCartManagerImpl implements IShoppingCartManager {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void deleteQuote(Long quotesId) throws Exception {
+    public void deleteQuote(Long quotesId,Jwt jwt) throws Exception {
         Quotes quote = quotesService.findByQuotesId(quotesId);
+          
+        jwtConverter.validateCustomerAccess(jwt,quote.getCustomersId().getId());
+       
         if (quote == null) {
             throw new Exception("Carrito de compras: " + quotesId + ", no encontrado.");
         }

@@ -56,7 +56,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncentiveItem {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(AddOrUpdateQuoteIncentiveItemImpl.class);
-    
+
     @Autowired
     private IInsentiveBalanceClient insentiveBalanceClient;
 
@@ -80,10 +80,10 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
 
     @Autowired
     private QuoteIncentiveItemsMapper quoteIncentiveItemsMapper;
-    
+
     @Autowired
     private IStockClient stockClient;
-    
+
     @Autowired
     private IRequestsWithoutInventory requestsWithoutInventoryService;
 
@@ -105,10 +105,10 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
         validateQuantity(shoppingCartItemRequest.getQuantity());
         
         Quotes dbQuotes = quotesService.findByQuotesId(shoppingCartItemRequest.quotes_id);
-        
+
         validateStockAvailability(dbQuotes, shoppingCartItemRequest);
-        
-        Date currentDate = DateUtils.getCurrentDate();        
+
+        Date currentDate = DateUtils.getCurrentDate();
 
         QuotesDto quotesDto = quotesMapper.quotesToQuotesDto(dbQuotes);
         IncentiveBalanceResponse incentiveBalance = validateIncentiveBalance(quotesDto.getCustomersId());
@@ -292,7 +292,7 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
      */
     @Transactional(rollbackFor = Exception.class)
     private QuotesDto updateQuoteWithExistingIncentiveItem(
-            QuotesDto quotesDto, QuoteIncentiveItemsDto quoteIncentiveItemsDto, 
+            QuotesDto quotesDto, QuoteIncentiveItemsDto quoteIncentiveItemsDto,
             Date currentDate, ShoppingCartItemDto shoppingCartItemRequest) {
 
         quotesDto.setUpdatedAt(currentDate);
@@ -372,7 +372,7 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
             incentiveOperationsService.isIncentiveSumValid(quotesDto, dbProduct, shoppingCartItemRequest, incentiveBalance.getIncentivoDisponible());
         }
     }
-    
+
     /**
      * Valida la disponibilidad de stock para el producto solicitado.
      *
@@ -388,8 +388,7 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
             );
         }
     }
-    
-    
+
     private void saveRequestsWithoutInventory(Quotes dbQuotes, ShoppingCartItemDto shoppingCartItemRequest, int stockResponse) {
         try {
             RequestsWithoutInventory requestsWithoutInventory = new RequestsWithoutInventory();
