@@ -39,49 +39,57 @@ import lombok.ToString;
 @Entity
 @Table(name = "requests_without_inventory")
 public class RequestsWithoutInventory {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "id")
     public Long id;
-    
+
     @Basic(optional = false)
     @Column(name = "customer_id")
     public String customerId;
-    
+
+    @Basic(optional = false)
+    @Column(name = "customer_fiscal_id")
+    public String customerFiscalId;
+
     @Basic(optional = false)
     @Column(name = "sku")
     public String sku;
-    
+
     @Basic(optional = false)
     @Column(name = "qty_requests")
     public int qtyRequests;
-    
+
     @Basic(optional = true)
     @Column(name = "qty_available")
     public int qtyAvailable;
-    
+
+    @Basic(optional = true)
+    @Column(name = "qty_diference")
+    public int qtyDiference;
+
     @Basic(optional = true)
     @Column(name = "product_type")
     public String productType;
-    
+
     @Basic(optional = false)
     @Column(name = "quotes_id")
     public long quotesId;
-    
+
     @Basic(optional = true)
     @Column(name = "event_type")
     public String eventType;
-    
+
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
     public Date createdAt;
-    
+
     @Basic(optional = false)
     @Column(name = "reported")
     public boolean reported;
-    
+
     @Column(name = "reported_at")
     @Temporal(TemporalType.TIMESTAMP)
     public Date reportedAt;

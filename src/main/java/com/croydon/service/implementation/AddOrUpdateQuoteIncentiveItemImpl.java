@@ -56,7 +56,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncentiveItem {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(AddOrUpdateQuoteIncentiveItemImpl.class);
-    
+
     @Autowired
     private IInsentiveBalanceClient insentiveBalanceClient;
 
@@ -80,10 +80,10 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
 
     @Autowired
     private QuoteIncentiveItemsMapper quoteIncentiveItemsMapper;
-    
+
     @Autowired
     private IStockClient stockClient;
-    
+
     @Autowired
     private IRequestsWithoutInventory requestsWithoutInventoryService;
 
@@ -102,20 +102,21 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
     @Override
     public QuotesDto addOrUpdateCartIncentiveItem(ShoppingCartItemDto shoppingCartItemRequest) throws IncentiveProductException, ProductException {
 
+        Products dbProduct = productsComponent.findIncetiveBySku(shoppingCartItemRequest.productSku);
+        
         validateQuantity(shoppingCartItemRequest.getQuantity());
-        
+
         Quotes dbQuotes = quotesService.findByQuotesId(shoppingCartItemRequest.quotes_id);
-        
+
         validateStockAvailability(dbQuotes, shoppingCartItemRequest);
-        
-        Date currentDate = DateUtils.getCurrentDate();        
+
+        Date currentDate = DateUtils.getCurrentDate();
 
         QuotesDto quotesDto = quotesMapper.quotesToQuotesDto(dbQuotes);
         IncentiveBalanceResponse incentiveBalance = validateIncentiveBalance(quotesDto.getCustomersId());
 
         validateIncentiveBalanceResponse(incentiveBalance);
-
-        Products dbProduct = productsComponent.findIncetiveBySku(shoppingCartItemRequest.productSku);
+        
         QuoteIncentiveItemsDto quoteIncentiveItemsDto = productsToQuotesItemsIncentiveMapper.ProductsToQuoteIncentiveItemsDto(dbProduct);
 
         setQuoteIncentiveItemsPK(quotesDto, shoppingCartItemRequest, quoteIncentiveItemsDto, dbProduct);
@@ -292,7 +293,7 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
      */
     @Transactional(rollbackFor = Exception.class)
     private QuotesDto updateQuoteWithExistingIncentiveItem(
-            QuotesDto quotesDto, QuoteIncentiveItemsDto quoteIncentiveItemsDto, 
+            QuotesDto quotesDto, QuoteIncentiveItemsDto quoteIncentiveItemsDto,
             Date currentDate, ShoppingCartItemDto shoppingCartItemRequest) {
 
         quotesDto.setUpdatedAt(currentDate);
@@ -372,7 +373,7 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
             incentiveOperationsService.isIncentiveSumValid(quotesDto, dbProduct, shoppingCartItemRequest, incentiveBalance.getIncentivoDisponible());
         }
     }
-    
+
     /**
      * Valida la disponibilidad de stock para el producto solicitado.
      *
@@ -388,16 +389,19 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
             );
         }
     }
-    
-    
+
     private void saveRequestsWithoutInventory(Quotes dbQuotes, ShoppingCartItemDto shoppingCartItemRequest, int stockResponse) {
+
         try {
+            int diferencia = shoppingCartItemRequest.quantity - stockResponse;
             RequestsWithoutInventory requestsWithoutInventory = new RequestsWithoutInventory();
 
             requestsWithoutInventory.setCustomerId(dbQuotes.getCustomersId().getId());
             requestsWithoutInventory.setSku(shoppingCartItemRequest.productSku);
+            requestsWithoutInventory.setCustomerFiscalId(dbQuotes.getCustomersId().getDocumentNumber());
             requestsWithoutInventory.setQtyRequests(shoppingCartItemRequest.quantity);
             requestsWithoutInventory.setQtyAvailable(stockResponse);
+            requestsWithoutInventory.setQtyDiference(diferencia);
             requestsWithoutInventory.setProductType("incentive");
             requestsWithoutInventory.setQuotesId(dbQuotes.id);
             requestsWithoutInventory.setEventType("shopping_cart");

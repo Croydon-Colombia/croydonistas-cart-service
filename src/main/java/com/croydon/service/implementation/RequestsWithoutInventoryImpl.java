@@ -30,11 +30,11 @@ public class RequestsWithoutInventoryImpl implements IRequestsWithoutInventory {
 
     @Autowired
     private RequestsWithoutInventoryDao service;
-    
+
     @Override
-   @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public RequestsWithoutInventory save(RequestsWithoutInventory requestsWithoutInventory) {
         return service.save(requestsWithoutInventory);
     }
-    
+
 }

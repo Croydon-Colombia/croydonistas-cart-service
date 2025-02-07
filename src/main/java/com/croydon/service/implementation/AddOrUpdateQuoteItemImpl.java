@@ -51,7 +51,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(AddOrUpdateQuoteItemImpl.class);
-    
+
     @Autowired
     private IStockClient stockClient;
 
@@ -94,13 +94,14 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
         if (shoppingCartItemRequest.quantity < 1) {
             throw new ProductException("ingresa cantidad valida para  añadir producto ");
         }
+        
+        Products dbProduct = productsComponent.findProductById(shoppingCartItemRequest.productSku);
+        
         Quotes dbQuotes = quotesService.findByQuotesId(shoppingCartItemRequest.quotes_id);
 
         validateStockAvailability(shoppingCartItemRequest, dbQuotes);
 
         Date currentDateTime = DateUtils.getCurrentDate();
-
-        Products dbProduct = productsComponent.findProductById(shoppingCartItemRequest.productSku);
 
         QuoteItemsDto quoteItemsDto = productsToQuotesItemsMapper.ProductsToQuoteItemsDto(dbProduct);
         QuotesDto quotesDto = quotesMapper.quotesToQuotesDto(dbQuotes);
@@ -220,12 +221,16 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
 
     private void saveRequestsWithoutInventory(Quotes dbQuotes, ShoppingCartItemDto shoppingCartItemRequest, int stockResponse) {
         try {
+            int diferencia = shoppingCartItemRequest.quantity - stockResponse;
+
             RequestsWithoutInventory requestsWithoutInventory = new RequestsWithoutInventory();
 
             requestsWithoutInventory.setCustomerId(dbQuotes.getCustomersId().getId());
             requestsWithoutInventory.setSku(shoppingCartItemRequest.productSku);
+            requestsWithoutInventory.setCustomerFiscalId(dbQuotes.getCustomersId().getDocumentNumber());
             requestsWithoutInventory.setQtyRequests(shoppingCartItemRequest.quantity);
             requestsWithoutInventory.setQtyAvailable(stockResponse);
+            requestsWithoutInventory.setQtyDiference(diferencia);
             requestsWithoutInventory.setProductType("product");
             requestsWithoutInventory.setQuotesId(dbQuotes.id);
             requestsWithoutInventory.setEventType("shopping_cart");
