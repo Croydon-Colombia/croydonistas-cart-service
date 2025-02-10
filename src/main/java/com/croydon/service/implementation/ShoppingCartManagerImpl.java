@@ -133,11 +133,7 @@ public class ShoppingCartManagerImpl implements IShoppingCartManager {
 
         Quotes dbQuotes = quotesService.findByQuotesId(shoppingCartItemRequest.quotes_id);
         
-        try {
-            jwtConverter.validateCustomerAccess(jwt,dbQuotes.getCustomersId().getId());
-        } catch (Exception ex) {
-            Logger.getLogger(ShoppingCartManagerImpl.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        jwtConverter.validateCustomerAccess(jwt,dbQuotes.getCustomersId().getId());       
         
         QuotesDto quotesDto = quotesMapper.quotesToQuotesDto(dbQuotes);
        

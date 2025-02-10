@@ -80,6 +80,7 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
     @Autowired
     private IRequestsWithoutInventory requestsWithoutInventoryService;
 
+    @Autowired
     private JwtAuthenticationConverter jwtAth;
     /**
      * Agrega o actualiza un producto en el carrito de compras.
@@ -99,14 +100,10 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
         if (shoppingCartItemRequest.quantity < 1) {
             throw new ProductException("ingresa cantidad valida para  añadir producto ");
         }
-        Quotes dbQuotes = quotesService.findByQuotesId(shoppingCartItemRequest.quotes_id);
+        Quotes dbQuotes = quotesService.findByQuotesId(shoppingCartItemRequest.quotes_id);        
+     
         
-        try {
-            jwtAth.validateCustomerAccess(jwt, dbQuotes.getCustomersId().getId());
-        } catch (Exception ex) {
-            Logger.getLogger(AddOrUpdateQuoteItemImpl.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
+        jwtAth.validateCustomerAccess(jwt, dbQuotes.getCustomersId().getId());
 
         validateStockAvailability(shoppingCartItemRequest, dbQuotes);
 

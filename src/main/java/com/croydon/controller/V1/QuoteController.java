@@ -18,6 +18,7 @@ import com.croydon.exceptions.ProductException;
 import com.croydon.exceptions.ShippingAddressException;
 import com.croydon.model.dto.QuotesDto;
 import com.croydon.model.dto.ShoppingCartItemDto;
+import com.croydon.security.JwtAuthenticationConverter;
 import com.croydon.service.IIncentiveCartManager;
 import com.croydon.service.IShoppingCartManager;
 import com.croydon.utilities.ApiResponse;
@@ -36,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  *
@@ -53,19 +55,20 @@ public class QuoteController {
 
     @Autowired
     private IShoppingCartManager shoppingCartManagerService;
+    
+    @Autowired
+    private JwtAuthenticationConverter jwth;
 
     @GetMapping("quotes/customer")
     public ResponseEntity<ApiResponse<QuotesDto>> findQuotesByClientId(@RequestParam("customerId") String customerId,@AuthenticationPrincipal Jwt jwt) {
-        try {
-            String authenticatedCustomerId = jwt.getClaim("given_name");
-            if(!authenticatedCustomerId.equals(customerId)){
-              return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new ApiResponse<>(null, "Unauthorized access", null));
-            }
-            
+       
+        
+        try {           
+            jwth.validateCustomerAccess(jwt, customerId);
+               
             QuotesDto response = shoppingCartManagerService.getOrCreateCart(customerId);
             return ResponseEntity.ok(new ApiResponse<>(response, "Success", null));
-        } catch (DataException ex) {
+        } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(null, ex.getMessage(), null));
         }
@@ -91,6 +94,9 @@ public class QuoteController {
         } catch (ProductException | ShippingAddressException ex) {
             logger.error(ex.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>(null, "Failed", ex.getMessage()));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(null, ex.getMessage(), null));
         }
     }
 
@@ -103,25 +109,31 @@ public class QuoteController {
         } catch (ShippingAddressException ex) {
             logger.error(ex.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>(null, "Failed", ex.getMessage()));
+        }catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(null, ex.getMessage(), null));
         }
     }
 
     @PostMapping("incentives/add-or-update")
-    public ResponseEntity<ApiResponse<QuotesDto>> addIncentiveProduct(@Valid @RequestBody ShoppingCartItemDto itemsRequest) {
+    public ResponseEntity<ApiResponse<QuotesDto>> addIncentiveProduct(@Valid @RequestBody ShoppingCartItemDto itemsRequest, @AuthenticationPrincipal Jwt jwt) {
         try {
 
-            QuotesDto response = incentiveCartManagerService.addOrUpdateIncentiveProduct(itemsRequest);
+            QuotesDto response = incentiveCartManagerService.addOrUpdateIncentiveProduct(itemsRequest, jwt);
             return ResponseEntity.ok(new ApiResponse<>(response, "Success", null));
         } catch (IncentiveProductException | ProductException ex) {
             logger.error(ex.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>(null, "Failed", ex.getMessage()));
+        }catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(null, ex.getMessage(), null));
         }
     }
 
     @PostMapping("incentives/delete")
-    public ResponseEntity<ApiResponse<QuotesDto>> deleteIncentiveProduct(@Valid @RequestBody ShoppingCartItemDto itemsRequest) {
+    public ResponseEntity<ApiResponse<QuotesDto>> deleteIncentiveProduct(@Valid @RequestBody ShoppingCartItemDto itemsRequest, @AuthenticationPrincipal Jwt jwt) {
         try {
-            QuotesDto response = incentiveCartManagerService.deleteIncentiveProduct(itemsRequest);
+            QuotesDto response = incentiveCartManagerService.deleteIncentiveProduct(itemsRequest, jwt);
             return ResponseEntity.ok(new ApiResponse<>(response, "Success", null));
         } catch (Exception ex) {
             logger.error(ex.getMessage());

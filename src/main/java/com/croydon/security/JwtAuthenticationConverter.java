@@ -1,6 +1,6 @@
 package com.croydon.security;
 
-import static java.util.Arrays.stream;
+import com.croydon.exceptions.UnauthorizedException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -109,15 +109,30 @@ public class JwtAuthenticationConverter implements Converter<Jwt, AbstractAuthen
         return jwt.getClaim(claimName);
     }
 
-   public void validateCustomerAccess(Jwt jwt, String customerIdFromQuote) throws Exception {
+    /**
+     * Valida si el usuario autenticado tiene acceso a la acción basada en su ID
+     * de cliente.
+     *
+     * @param jwt Token JWT del usuario autenticado.
+     * @param customerIdFromQuote ID del cliente asociado a la cotización.
+     * @throws ResponseStatusException Si el usuario autenticado no coincide con
+     * el propietario de la cotización.
+     */
+    public void validateCustomerAccess(Jwt jwt, String customerIdFromQuote) throws ResponseStatusException {
         String authenticatedCustomerId = getAuthenticatedCustomerId(jwt);
         if (!authenticatedCustomerId.equals(customerIdFromQuote)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No estás autorizado para realizar esta acción");
         }
     }
-    
+
+    /**
+     * Extrae el ID del cliente autenticado desde el token JWT.
+     *
+     * @param jwt Token JWT del usuario autenticado.
+     * @return ID del cliente autenticado.
+     */
     private String getAuthenticatedCustomerId(Jwt jwt) {
-        
-        return  jwt.getClaim("given_name");
+
+        return jwt.getClaim("given_name");
     }
 }

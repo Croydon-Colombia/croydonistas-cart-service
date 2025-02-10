@@ -30,6 +30,7 @@ import com.croydon.model.dto.ShoppingCartItemDto;
 import com.croydon.model.entity.Products;
 import com.croydon.model.entity.Quotes;
 import com.croydon.model.entity.RequestsWithoutInventory;
+import com.croydon.security.JwtAuthenticationConverter;
 import com.croydon.service.IAddOrUpdateQuoteIncentiveItem;
 import com.croydon.service.IIncentiveOperations;
 import com.croydon.service.IProducts;
@@ -40,8 +41,11 @@ import com.croydon.utilities.DateUtils;
 import java.text.MessageFormat;
 import java.util.Date;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -86,6 +90,10 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
 
     @Autowired
     private IRequestsWithoutInventory requestsWithoutInventoryService;
+    
+    @Autowired
+    private JwtAuthenticationConverter jwtAuth;
+    
 
     /**
      * Agrega o actualiza un producto de incentivo en el carrito de compras.
@@ -100,11 +108,14 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
      */
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public QuotesDto addOrUpdateCartIncentiveItem(ShoppingCartItemDto shoppingCartItemRequest) throws IncentiveProductException, ProductException {
+    public QuotesDto addOrUpdateCartIncentiveItem(ShoppingCartItemDto shoppingCartItemRequest,Jwt jwt) throws IncentiveProductException, ProductException{
 
         validateQuantity(shoppingCartItemRequest.getQuantity());
         
         Quotes dbQuotes = quotesService.findByQuotesId(shoppingCartItemRequest.quotes_id);
+        
+        // Validar que el usuario autenticado tiene acceso a la cotización
+       jwtAuth.validateCustomerAccess(jwt, dbQuotes.getCustomersId().getId());
 
         validateStockAvailability(dbQuotes, shoppingCartItemRequest);
 

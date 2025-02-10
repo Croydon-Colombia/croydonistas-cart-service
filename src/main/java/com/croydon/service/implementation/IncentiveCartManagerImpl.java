@@ -21,12 +21,16 @@ import com.croydon.model.dto.QuotesDto;
 import com.croydon.model.dto.ShoppingCartItemDto;
 import com.croydon.model.entity.QuoteIncentiveItems;
 import com.croydon.model.entity.Quotes;
+import com.croydon.security.JwtAuthenticationConverter;
 import com.croydon.service.IAddOrUpdateQuoteIncentiveItem;
 import com.croydon.service.IIncentiveCartManager;
 import com.croydon.service.IQuotes;
 import com.croydon.utilities.DateUtils;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,6 +57,8 @@ public class IncentiveCartManagerImpl implements IIncentiveCartManager {
     @Autowired
     QuoteIncentiveItemsDao quoteIncentiveItemsService;
     
+    @Autowired
+    private JwtAuthenticationConverter jwtAth;
 
     /**
      * Agrega o actualiza un producto de incentivo en un carrito de compras.
@@ -66,9 +72,9 @@ public class IncentiveCartManagerImpl implements IIncentiveCartManager {
      * producto.
      */
     @Override
-    public QuotesDto addOrUpdateIncentiveProduct(ShoppingCartItemDto shoppingCartItemRequest) throws IncentiveProductException, ProductException {
+    public QuotesDto addOrUpdateIncentiveProduct(ShoppingCartItemDto shoppingCartItemRequest,Jwt jwt) throws IncentiveProductException, ProductException {
 
-        return addOrUpdateQuoteIncentiveItemService.addOrUpdateCartIncentiveItem(shoppingCartItemRequest);
+        return addOrUpdateQuoteIncentiveItemService.addOrUpdateCartIncentiveItem(shoppingCartItemRequest, jwt);
 
     }
 
@@ -81,12 +87,15 @@ public class IncentiveCartManagerImpl implements IIncentiveCartManager {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public QuotesDto deleteIncentiveProduct(ShoppingCartItemDto shoppingCartItemRequest) {
+    public QuotesDto deleteIncentiveProduct(ShoppingCartItemDto shoppingCartItemRequest,Jwt jwt) {
         
             Date currentDateTime = DateUtils.getCurrentDate();
 
     // Buscar la entidad Quotes por su ID
     Quotes dbQuotes = quotesService.findByQuotesId(shoppingCartItemRequest.quotes_id);
+    
+    jwtAth.validateCustomerAccess(jwt, dbQuotes.getCustomersId().getId());
+     
     QuotesDto quotesDto = quotesMapper.quotesToQuotesDto(dbQuotes);
     
     // Filtrar y encontrar el incentivo que se va a eliminar
