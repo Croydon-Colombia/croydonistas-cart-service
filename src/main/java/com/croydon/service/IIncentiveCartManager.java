@@ -17,7 +17,6 @@ import com.croydon.exceptions.IncentiveProductException;
 import com.croydon.exceptions.ProductException;
 import com.croydon.model.dto.QuotesDto;
 import com.croydon.model.dto.ShoppingCartItemDto;
-import org.springframework.security.oauth2.jwt.Jwt;
 
 /**
  *
@@ -25,8 +24,8 @@ import org.springframework.security.oauth2.jwt.Jwt;
  */
 public interface IIncentiveCartManager {
 
-    QuotesDto addOrUpdateIncentiveProduct(ShoppingCartItemDto shoppingCartItemRequest, Jwt jwt) throws IncentiveProductException, ProductException;
+    QuotesDto addOrUpdateIncentiveProduct(ShoppingCartItemDto shoppingCartItemRequest) throws IncentiveProductException, ProductException;
 
-    QuotesDto deleteIncentiveProduct(ShoppingCartItemDto shoppingCartItemRequest, Jwt jwt);
+    QuotesDto deleteIncentiveProduct(ShoppingCartItemDto shoppingCartItemRequest);
     
 }

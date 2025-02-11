@@ -39,10 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.croydon.service.IAddOrUpdateQuoteItem;
 import com.croydon.service.IRequestsWithoutInventory;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -95,16 +92,13 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
      */
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public QuotesDto addOrUpdateCartProduct(ShoppingCartItemDto shoppingCartItemRequest, Jwt jwt) throws ShippingAddressException, ProductException {
+    public QuotesDto addOrUpdateCartProduct(ShoppingCartItemDto shoppingCartItemRequest) throws ShippingAddressException, ProductException {
 
         if (shoppingCartItemRequest.quantity < 1) {
             throw new ProductException("ingresa cantidad valida para  añadir producto ");
         }
-        Quotes dbQuotes = quotesService.findByQuotesId(shoppingCartItemRequest.quotes_id);        
+        Quotes dbQuotes = quotesService.findByQuotesId(shoppingCartItemRequest.quotes_id);    
      
-        
-        jwtAth.validateCustomerAccess(jwt, dbQuotes.getCustomersId().getId());
-
         validateStockAvailability(shoppingCartItemRequest, dbQuotes);
 
         Date currentDateTime = DateUtils.getCurrentDate();

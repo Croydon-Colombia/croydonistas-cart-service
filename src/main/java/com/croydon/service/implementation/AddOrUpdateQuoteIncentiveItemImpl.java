@@ -108,14 +108,13 @@ public class AddOrUpdateQuoteIncentiveItemImpl implements IAddOrUpdateQuoteIncen
      */
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public QuotesDto addOrUpdateCartIncentiveItem(ShoppingCartItemDto shoppingCartItemRequest,Jwt jwt) throws IncentiveProductException, ProductException{
+    public QuotesDto addOrUpdateCartIncentiveItem(ShoppingCartItemDto shoppingCartItemRequest) throws IncentiveProductException, ProductException{
 
         validateQuantity(shoppingCartItemRequest.getQuantity());
         
-        Quotes dbQuotes = quotesService.findByQuotesId(shoppingCartItemRequest.quotes_id);
-        
+        Quotes dbQuotes = quotesService.findByQuotesId(shoppingCartItemRequest.quotes_id);       
         // Validar que el usuario autenticado tiene acceso a la cotización
-       jwtAuth.validateCustomerAccess(jwt, dbQuotes.getCustomersId().getId());
+      
 
         validateStockAvailability(dbQuotes, shoppingCartItemRequest);
 

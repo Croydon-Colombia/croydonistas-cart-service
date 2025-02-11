@@ -26,8 +26,8 @@ import org.springframework.security.oauth2.jwt.Jwt;
 public interface IShoppingCartManager {
     
     QuotesDto getOrCreateCart(String customerId);
-    QuotesDto addOrUpdateCartProduct(ShoppingCartItemDto shoppingCartItemRequest, Jwt jwt) throws ShippingAddressException, ProductException;
-    QuotesDto deleteCartProduct(ShoppingCartItemDto shoppingCartItemRequest, Jwt jwt) throws ShippingAddressException;
-    void deleteQuote(Long quotesId, Jwt jwt) throws Exception;
+    QuotesDto addOrUpdateCartProduct(ShoppingCartItemDto shoppingCartItemRequest) throws ShippingAddressException, ProductException;
+    QuotesDto deleteCartProduct(ShoppingCartItemDto shoppingCartItemRequest) throws ShippingAddressException;
+    void deleteQuote(Long quotesId) throws Exception;
     
 }

@@ -17,7 +17,6 @@ import com.croydon.exceptions.ProductException;
 import com.croydon.exceptions.ShippingAddressException;
 import com.croydon.model.dto.QuotesDto;
 import com.croydon.model.dto.ShoppingCartItemDto;
-import org.springframework.security.oauth2.jwt.Jwt;
 
 /**
  *
@@ -25,5 +24,5 @@ import org.springframework.security.oauth2.jwt.Jwt;
  */
 public interface IAddOrUpdateQuoteItem {
 
-    QuotesDto addOrUpdateCartProduct(ShoppingCartItemDto shoppingCartItemRequest,Jwt jwt) throws ShippingAddressException, ProductException;
+    QuotesDto addOrUpdateCartProduct(ShoppingCartItemDto shoppingCartItemRequest) throws ShippingAddressException, ProductException;
 }
