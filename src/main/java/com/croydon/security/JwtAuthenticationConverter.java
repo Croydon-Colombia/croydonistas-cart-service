@@ -26,10 +26,10 @@ import org.springframework.web.server.ResponseStatusException;
 public class JwtAuthenticationConverter implements Converter<Jwt, AbstractAuthenticationToken> {
 
     private final JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
+    
     @Value("${jwt.convert.principal-atribute}")
     private String principalAtribute;
-    @Value("${jwt.convert.resource.id}")
-    private String resourceId;
+    
 
     /**
      * Convierte un token JWT en una instancia de JwtAuthenticationToken.
@@ -52,9 +52,9 @@ public class JwtAuthenticationConverter implements Converter<Jwt, AbstractAuthen
     }
 
     /**
-     * Extrae los roles del usuario desde el claim "resource_access" del JWT.
+     * Extrae los roles del usuario desde el claim "realm_access" del JWT.
      *
-     * - Verifica si el token contiene información sobre "resource_access". -
+     * - Verifica si el token contiene información sobre "realm_access". -
      * Obtiene los roles asignados al usuario dentro del recurso configurado. -
      * Convierte los roles en una lista de GrantedAuthority.
      *
@@ -63,26 +63,18 @@ public class JwtAuthenticationConverter implements Converter<Jwt, AbstractAuthen
      */
     private Collection<? extends GrantedAuthority> extracResourceRole(Jwt jwt) {
 
-        Map<String, Object> resourceAccess;
-        Map<String, Object> resource;
+        Map<String, Object> realmAccess;       
         Collection<String> resourceRoles;
 
-        if (jwt.getClaim("resource_access") == null) {
+        if (jwt.getClaim("realm_access") == null) {
             return List.of();
         }
-        resourceAccess = jwt.getClaim("resource_access");
+        realmAccess = jwt.getClaim("realm_access");
 
-        if (resourceAccess.get(resourceId) == null) {
+        if (realmAccess.get("roles") == null) {
             return List.of();
         }
-
-        resource = (Map<String, Object>) resourceAccess.get(resourceId);
-
-        if (resource.get("roles") == null) {
-            return List.of();
-        }
-
-        resourceRoles = (Collection<String>) resource.get("roles");
+        resourceRoles = (Collection<String>) realmAccess.get("roles");
 
         return resourceRoles.stream()
                 .map(role -> new SimpleGrantedAuthority("ROLE_".concat(role)))

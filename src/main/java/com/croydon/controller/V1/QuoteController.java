@@ -42,7 +42,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/shopping-cart/v1")
-@PreAuthorize("hasRole('croydonista_client')")
+@PreAuthorize("hasRole('croydonista')")
 public class QuoteController {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(QuoteController.class);
