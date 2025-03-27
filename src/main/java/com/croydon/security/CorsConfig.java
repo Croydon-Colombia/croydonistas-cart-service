@@ -1,45 +1,39 @@
 package com.croydon.security;
 
-import jakarta.servlet.Filter;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
+import java.util.List;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 /**
  *
  * @author Jose
  */
-@Component
-@Order(Ordered.HIGHEST_PRECEDENCE)
-public class CorsConfig implements Filter {
+@Configuration
+public class CorsConfig {
 
-    @Override
-    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) 
-            throws IOException, ServletException {
-        
-        HttpServletResponse response = (HttpServletResponse) res;
-        HttpServletRequest request = (HttpServletRequest) req;
+    /**
+     * Configura la política CORS para la aplicación.
+     *
+     * - Permite solicitudes desde cualquier origen (configurado con '*'). -
+     * Especifica los métodos HTTP permitidos: GET, POST, PUT, DELETE, OPTIONS.
+     * - Permite todas las cabeceras. - Permite el uso de credenciales (cookies,
+     * cabeceras de autorización, etc.).
+     *
+     * @return La configuración de CORS que será aplicada a todas las rutas de
+     * la aplicación.
+     */
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("*")); // Cambia según necesidad
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
 
-        // Configuración de headers CORS
-        response.setHeader("Access-Control-Allow-Origin", "*");
-        response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-        response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
-        response.setHeader("Access-Control-Max-Age", "3600");
-        response.setHeader("Access-Control-Allow-Credentials", "true");
-        response.setHeader("Access-Control-Expose-Headers", "Authorization, Content-Disposition");
-
-        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
-            response.setStatus(HttpServletResponse.SC_OK);
-        } else {
-            chain.doFilter(req, res);
-        }
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
 }
