@@ -13,6 +13,7 @@
  */
 package com.croydon.model.dto;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import lombok.Data;
@@ -23,7 +24,7 @@ import lombok.Data;
  */
 @Data
 public class QuotesDto {
-    
+
     public Long id;
 
     public Date createdAt;
@@ -105,4 +106,51 @@ public class QuotesDto {
     public Collection<QuoteItemsDto> quoteItemsCollection;
 
     public Collection<QuoteIncentiveItemsDto> quoteIncentiveItemsCollection;
+
+    // Constructor de copia
+    public QuotesDto(QuotesDto other) {
+        this.id = other.id;
+        this.createdAt = other.createdAt;
+        this.updatedAt = other.updatedAt;
+        this.availableCreditLimit = other.availableCreditLimit;
+        this.availableIncentives = other.availableIncentives;
+        this.discountAmount = other.discountAmount;
+        this.discountCode = other.discountCode;
+        this.discountPercent = other.discountPercent;
+        this.documentCompany = other.documentCompany;
+        this.documentNumber = other.documentNumber;
+        this.documentTypeCode = other.documentTypeCode;
+        this.employeeLimitUsed = other.employeeLimitUsed;
+        this.employeeQuoteLimit = other.employeeQuoteLimit;
+        this.grandTotal = other.grandTotal;
+        this.hasIncentives = other.hasIncentives;
+        this.incentives = other.incentives;
+        this.incrementId = other.incrementId;
+        this.ip = other.ip;
+        this.lineNumber = other.lineNumber;
+        this.requestedIncentives = other.requestedIncentives;
+        this.requiredCreditLimit = other.requiredCreditLimit;
+        this.sale = other.sale;
+        this.shippingAmountBase = other.shippingAmountBase;
+        this.shippingInclTax = other.shippingInclTax;
+        this.shippingTaxAmount = other.shippingTaxAmount;
+        this.shippingValue = other.shippingValue;
+        this.subtotal = other.subtotal;
+        this.taxAmount = other.taxAmount;
+        this.totalBase = other.totalBase;
+        this.totalInclTax = other.totalInclTax;
+        this.userAgent = other.userAgent;
+        this.available = other.available;
+        this.totalQty = other.totalQty;
+        this.totalQtyIncentives = other.totalQtyIncentives;
+        this.cancelledAt = other.cancelledAt;
+        this.employeeLimitPending = other.employeeLimitPending;
+        this.shippingLineNumber = other.shippingLineNumber;
+
+        this.quoteTotalsCollection = (other.quoteTotalsCollection != null) ? new ArrayList<>(other.quoteTotalsCollection) : new ArrayList<>();
+        this.quoteItemsCollection = (other.quoteItemsCollection != null) ? new ArrayList<>(other.quoteItemsCollection) : new ArrayList<>();
+        this.quoteIncentiveItemsCollection = (other.quoteIncentiveItemsCollection != null) ? new ArrayList<>(other.quoteIncentiveItemsCollection) : new ArrayList<>();
+
+        this.customersId = other.customersId;
+    }
 }

@@ -23,7 +23,7 @@ import lombok.Data;
  */
 @Data
 public class QuoteItemsDto {
-    
+
     public QuoteItemsPKDto quoteItemsPK;
 
     public Date createdAt;
@@ -93,6 +93,48 @@ public class QuoteItemsDto {
     public String unidadPum;
 
     public List<EmployeeLineItemsDto> employeeLineItemsCollection;
-    
+
     public String substituteCode;
+
+    public QuoteItemsDto copyFrom(QuoteItemsDto source) {
+        this.quoteItemsPK = source.quoteItemsPK;
+        this.createdAt = source.createdAt;
+        this.updatedAt = source.updatedAt;
+        this.added = source.added;
+        this.appliedDiscount = source.appliedDiscount;
+        this.appliedEmployeeDiscount = source.appliedEmployeeDiscount;
+        this.basePrice = source.basePrice;
+        this.basePriceInclTax = source.basePriceInclTax;
+        this.basePriceJde = source.basePriceJde;
+        this.category = source.category;
+        this.discountPrice = source.discountPrice;
+        this.haveEmployeeLines = source.haveEmployeeLines;
+        this.lineNumber = source.lineNumber;
+        this.name = source.name;
+        this.originalBasePrice = source.originalBasePrice;
+        this.originalPercentDiscount = source.originalPercentDiscount;
+        this.percentDiscount = source.percentDiscount;
+        this.precioPum = source.precioPum;
+        this.priceInclTax = source.priceInclTax;
+        this.priceToSend = source.priceToSend;
+        this.quoteLimitApplied = source.quoteLimitApplied;
+        this.sendPrice = source.sendPrice;
+        this.taxAmount = source.taxAmount;
+        this.taxCode = source.taxCode;
+        this.taxPercent = source.taxPercent;
+        this.thumbnail = source.thumbnail;
+        this.unidadPum = source.unidadPum;
+        this.substituteCode = source.substituteCode;
+
+        // Agregar los valores sumables
+        this.qty = source.qty;
+        this.total = source.total;
+        this.totalBasePrice = source.totalBasePrice;
+        this.totalDiscount = source.totalDiscount;
+        this.totalInclTax = source.totalInclTax;
+        this.totalOriginalBasePrice = source.totalOriginalBasePrice;
+        this.totalTaxAmount = source.totalTaxAmount;
+
+        return this;
+    }
 }
