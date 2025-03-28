@@ -18,6 +18,8 @@ import com.croydon.exceptions.ProductException;
 import com.croydon.model.dao.ProductsDao;
 import com.croydon.model.entity.Products;
 import com.croydon.service.IProducts;
+import java.util.Comparator;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -44,11 +46,18 @@ public class ProductsImpl implements IProducts {
      * datos.
      */
     @Override
-    public Products findProductById(String id) throws ProductException {
+    public List<Products> findProductById(String id) throws ProductException {
 
-        return productsDao.findById(id)
-                .orElseThrow(()
-                        -> new ProductException("Producto " + id + " no encontrado en DB"));
+        List<Products> products = productsDao.findProductWithSubstitutes(id);
+
+        if (products.isEmpty()) {
+            throw new ProductException("Producto " + id + " no encontrado en DB ni como sustituto");
+        }
+
+        // Si hay más de un producto, aplicamos lógica de selección (orden por prioridad, stock, etc.)
+        return products.stream()
+                .sorted(Comparator.comparingInt(Products::getSubstitutePriority))
+                .toList();
 
     }
 

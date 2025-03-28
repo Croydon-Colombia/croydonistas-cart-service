@@ -183,4 +183,6 @@ public class QuoteItems {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "quoteItems")
     public Collection<EmployeeLineItems> employeeLineItemsCollection;
 
+    @Column(name = "substitute_code")
+    private String substituteCode;
 }

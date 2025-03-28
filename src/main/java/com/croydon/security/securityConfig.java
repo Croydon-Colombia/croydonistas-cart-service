@@ -44,7 +44,7 @@ public class securityConfig {
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and() // Manejo de excepciones no autorizadas
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and() // Sesiones sin estado (JWT)
                 .authorizeRequests()
-                .requestMatchers("/shopping-cart/v1/**").authenticated() // Rutas que requieren autenticación
+                //.requestMatchers("/shopping-cart/v1/**").authenticated() // Rutas que requieren autenticación
                 .anyRequest().permitAll();  // El resto de las rutas permiten acceso sin autenticación
 
         // Añadir el filtro antes del filtro de autenticación por defecto

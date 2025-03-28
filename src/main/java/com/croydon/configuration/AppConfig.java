@@ -41,7 +41,7 @@ public class AppConfig {
                 .defaultHeader("Authorization", "Basic " + stockAuth)
                 .build();
     }
-
+    
     @Bean
     public WebClient oAuthWebClient(OAuthServiceImpl oAuthService) {
         return WebClient.builder()

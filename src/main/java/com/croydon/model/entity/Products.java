@@ -182,4 +182,13 @@ public class Products {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "products")
     public Collection<ConfigurableProductLinks> configurableProductLinksCollection;
+    
+    @Column(name = "substitute_code")
+    public String substituteCode;
+    
+    @Column(name = "substitute_priority")
+    public int substitutePriority;
+    
+    @Column(name = "substitute_description")
+    public String substituteDescription;
 }

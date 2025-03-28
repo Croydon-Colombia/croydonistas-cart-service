@@ -93,4 +93,6 @@ public class QuoteItemsDto {
     public String unidadPum;
 
     public List<EmployeeLineItemsDto> employeeLineItemsCollection;
+    
+    public String substituteCode;
 }

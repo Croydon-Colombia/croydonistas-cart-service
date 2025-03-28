@@ -38,6 +38,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.croydon.service.IAddOrUpdateQuoteItem;
 import com.croydon.service.IRequestsWithoutInventory;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -92,60 +95,63 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
     public QuotesDto addOrUpdateCartProduct(ShoppingCartItemDto shoppingCartItemRequest) throws ShippingAddressException, ProductException {
 
         if (shoppingCartItemRequest.quantity < 1) {
-            throw new ProductException("ingresa cantidad valida para  añadir producto ");
+            throw new ProductException("Ingresa una cantidad válida para añadir producto");
         }
-        
-        Products dbProduct = productsComponent.findProductById(shoppingCartItemRequest.productSku);
-        
-        Quotes dbQuotes = quotesService.findByQuotesId(shoppingCartItemRequest.quotes_id);
-
-        validateStockAvailability(shoppingCartItemRequest, dbQuotes);
 
         Date currentDateTime = DateUtils.getCurrentDate();
+        List<Products> dbProducts = productsComponent.findProductById(shoppingCartItemRequest.productSku);
+        Quotes dbQuotes = quotesService.findByQuotesId(shoppingCartItemRequest.quotes_id);
 
-        QuoteItemsDto quoteItemsDto = productsToQuotesItemsMapper.ProductsToQuoteItemsDto(dbProduct);
+        // Obtener el stock disponible de todos los productos en una sola iteración
+        Map<String, Integer> stockMap = new HashMap<>();
+        int totalAvailableStock = 0;
+        for (Products product : dbProducts) {
+            int stock = stockClient.getStock(product.getId(), "CP001").block().getQty();
+            stockMap.put(product.getId(), stock);
+            totalAvailableStock += stock;
+            if (totalAvailableStock >= shoppingCartItemRequest.quantity) {
+                break; // Detener si ya tenemos suficiente stock
+            }
+        }
+
+        if (totalAvailableStock < shoppingCartItemRequest.quantity) {
+            throw new ProductException(MessageFormat.format("Cantidad solicitada {0}, disponible {1}", shoppingCartItemRequest.quantity, totalAvailableStock));
+        }
+
+        int remainingQuantity = shoppingCartItemRequest.quantity;
         QuotesDto quotesDto = quotesMapper.quotesToQuotesDto(dbQuotes);
 
-        quoteItemsDto.setQuoteItemsPK(setQuoteItemsPKDto(quotesDto, dbProduct));
+        for (Products dbProduct : dbProducts) {
+            int availableStock = stockMap.getOrDefault(dbProduct.getId(), 0);
 
-        if (existingItem(quotesDto, quoteItemsDto)) {
-            return updateQuoteWithExististItem(quotesDto, quoteItemsDto, dbProduct, currentDateTime, shoppingCartItemRequest.getQuantity(), shoppingCartItemRequest.getIsUpdateOnly());
-        } else {
-            return addNewItemToQuote(quotesDto, quoteItemsDto, shoppingCartItemRequest.quantity, dbProduct, currentDateTime);
+            if (availableStock > 0) {
+                int quantityToAdd = Math.min(availableStock, remainingQuantity);
+                remainingQuantity -= quantityToAdd;
+
+                QuoteItemsDto quoteItemsDto = productsToQuotesItemsMapper.ProductsToQuoteItemsDto(dbProduct);
+
+                String substituteCode = dbProduct.getSubstituteCode();
+                quoteItemsDto.setSubstituteCode((substituteCode == null || substituteCode.isEmpty()) ? dbProduct.getId() : substituteCode);
+
+                if (substituteCode != null && !substituteCode.isEmpty()) {
+                    quoteItemsDto.setName(dbProduct.getSubstituteDescription());
+                }
+
+                quoteItemsDto.setQuoteItemsPK(setQuoteItemsPKDto(quotesDto, dbProduct));
+
+                if (existingItem(quotesDto, quoteItemsDto)) {
+                    quotesDto = updateQuoteWithExististItem(quotesDto, quoteItemsDto, dbProduct, currentDateTime, quantityToAdd, shoppingCartItemRequest.getIsUpdateOnly());
+                } else {
+                    quotesDto = addNewItemToQuote(quotesDto, quoteItemsDto, quantityToAdd, dbProduct, currentDateTime);
+                }
+
+                if (remainingQuantity == 0) {
+                    break; // Detener iteración si ya cubrimos la cantidad necesaria
+                }
+            }
         }
-    }
 
-    /**
-     * Añade un nuevo ítem al carrito de compras.
-     *
-     * @param quotesDto el DTO del carrito.
-     * @param quoteItemsDto el DTO del ítem del carrito.
-     * @param quantity la cantidad del producto.
-     * @param dbProduct la entidad del producto.
-     * @param currentDateTime la fecha y hora actuales.
-     * @return el DTO del carrito actualizado con los nuevos totales.
-     * @throws ShippingAddressException si hay un problema con la dirección de
-     * envío.
-     */
-    @Transactional(rollbackFor = Exception.class)
-    private QuotesDto addNewItemToQuote(QuotesDto quotesDto, QuoteItemsDto quoteItemsDto, int quantity, Products dbProduct, Date currentDateTime) throws ShippingAddressException, ProductException {
-
-        quoteItemsDto.setLineNumber(quotesDto.getLineNumber());
-        quoteItemsDto.setQty(quantity);
-        quoteItemsDto.setUpdatedAt(currentDateTime);
-        quoteItemsDto.setCreatedAt(currentDateTime);
-
-        QuotesDto updatedQuotesDto = IAddQuoteItemService.addNewQuoteItem(quotesDto, quoteItemsDto, dbProduct);
-        QuotesDto quoteDtoWithTotals = collectsQuoteTotalsService.quotesDto(updatedQuotesDto);
-
-        quoteDtoWithTotals.setLineNumber(quotesDto.getLineNumber() + 1);
-
-        Quotes quotesToUpdate = quotesMapper.quotesDtoToQuotes(quoteDtoWithTotals);
-
-        updateQuoteHeaderWithTotals(quotesToUpdate);
-
-        return quoteDtoWithTotals;
-
+        return quotesDto;
     }
 
     /**
@@ -190,6 +196,39 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
     }
 
     /**
+     * Añade un nuevo ítem al carrito de compras.
+     *
+     * @param quotesDto el DTO del carrito.
+     * @param quoteItemsDto el DTO del ítem del carrito.
+     * @param quantity la cantidad del producto.
+     * @param dbProduct la entidad del producto.
+     * @param currentDateTime la fecha y hora actuales.
+     * @return el DTO del carrito actualizado con los nuevos totales.
+     * @throws ShippingAddressException si hay un problema con la dirección de
+     * envío.
+     */
+    @Transactional(rollbackFor = Exception.class)
+    private QuotesDto addNewItemToQuote(QuotesDto quotesDto, QuoteItemsDto quoteItemsDto, int quantity, Products dbProduct, Date currentDateTime) throws ShippingAddressException, ProductException {
+
+        quoteItemsDto.setLineNumber(quotesDto.getLineNumber());
+        quoteItemsDto.setQty(quantity);
+        quoteItemsDto.setUpdatedAt(currentDateTime);
+        quoteItemsDto.setCreatedAt(currentDateTime);
+
+        QuotesDto updatedQuotesDto = IAddQuoteItemService.addNewQuoteItem(quotesDto, quoteItemsDto, dbProduct);
+        QuotesDto quoteDtoWithTotals = collectsQuoteTotalsService.quotesDto(updatedQuotesDto);
+
+        quoteDtoWithTotals.setLineNumber(quotesDto.getLineNumber() + 1);
+
+        Quotes quotesToUpdate = quotesMapper.quotesDtoToQuotes(quoteDtoWithTotals);
+
+        updateQuoteHeaderWithTotals(quotesToUpdate);
+
+        return quoteDtoWithTotals;
+
+    }
+
+    /**
      * Comprueba si un ítem ya existe en el carrito de compras.
      *
      * @param quotesDto el DTO del carrito.
@@ -209,8 +248,8 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
      * @param shoppingCartItemRequest el producto que se desea validar.
      * @throws ProductException si no hay suficiente stock disponible.
      */
-    private void validateStockAvailability(ShoppingCartItemDto shoppingCartItemRequest, Quotes dbQuotes) throws ProductException {
-        StockResponse stockResponse = stockClient.getStock(shoppingCartItemRequest.productSku, "CP001").block();
+    private void validateStockAvailability(ShoppingCartItemDto shoppingCartItemRequest, Quotes dbQuotes, Products dbProduct) throws ProductException {
+        StockResponse stockResponse = stockClient.getStock(dbProduct.getId(), "CP001").block();
         if (stockResponse.getQty() < shoppingCartItemRequest.getQuantity()) {
             saveRequestsWithoutInventory(dbQuotes, shoppingCartItemRequest, stockResponse.qty);
             throw new ProductException(

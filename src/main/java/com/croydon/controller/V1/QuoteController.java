@@ -51,14 +51,15 @@ public class QuoteController {
 
     @Autowired
     private IShoppingCartManager shoppingCartManagerService;
-    @Autowired
-    private CustomerAuth customerAuth;
+    
+    //@Autowired
+    //private CustomerAuth customerAuth;
 
     @GetMapping("quotes/customer")
     public ResponseEntity<ApiResponse<QuotesDto>> findQuotesByClientId(@RequestParam("customerId") String customerId) {
         try {
             // Obtener el cliente autenticado usando CustomerAuth
-            var customer = customerAuth.get();
+            //var customer = customerAuth.get(); // -> Descomentarizar en prod
             QuotesDto response = shoppingCartManagerService.getOrCreateCart(customerId);
             return ResponseEntity.ok(new ApiResponse<>(response, "Success", null));
         } catch (DataException ex) {
@@ -72,7 +73,7 @@ public class QuoteController {
     public ResponseEntity<ApiResponse<QuotesDto>> deleteQuote(@RequestParam("quotesId") Long quotesId) {
         try {
             // Obtener el cliente autenticado usando CustomerAuth
-            var customer = customerAuth.get();
+            //var customer = customerAuth.get();
             shoppingCartManagerService.deleteQuote(quotesId);
             return ResponseEntity.ok(new ApiResponse<>(null, "Carrito de compras: " + quotesId + ", Eliminado!", null));
         } catch (Exception ex) {
@@ -85,7 +86,7 @@ public class QuoteController {
     public ResponseEntity<ApiResponse<QuotesDto>> addProduct(@Valid @RequestBody ShoppingCartItemDto itemsRequest) {
         try {
             // Obtener el cliente autenticado usando CustomerAuth
-            var customer = customerAuth.get();
+            // var customer = customerAuth.get(); // -> Descomentarizar en prod
             QuotesDto response = shoppingCartManagerService.addOrUpdateCartProduct(itemsRequest);
             return ResponseEntity.ok(new ApiResponse<>(response, "Success", null));
         } catch (ProductException | ShippingAddressException ex) {
@@ -98,7 +99,7 @@ public class QuoteController {
     public ResponseEntity<ApiResponse<QuotesDto>> deleteProduct(@Valid @RequestBody ShoppingCartItemDto itemsRequest) {
         try {
             // Obtener el cliente autenticado usando CustomerAuth
-            var customer = customerAuth.get();
+            //var customer = customerAuth.get();
             QuotesDto response = shoppingCartManagerService.deleteCartProduct(itemsRequest);
             return ResponseEntity.ok(new ApiResponse<>(response, "Success", null));
         } catch (ShippingAddressException ex) {
@@ -111,7 +112,7 @@ public class QuoteController {
     public ResponseEntity<ApiResponse<QuotesDto>> addIncentiveProduct(@Valid @RequestBody ShoppingCartItemDto itemsRequest) {
         try {
             // Obtener el cliente autenticado usando CustomerAuth
-            var customer = customerAuth.get();
+            //var customer = customerAuth.get();
             QuotesDto response = incentiveCartManagerService.addOrUpdateIncentiveProduct(itemsRequest);
             return ResponseEntity.ok(new ApiResponse<>(response, "Success", null));
         } catch (IncentiveProductException | ProductException ex) {
@@ -124,7 +125,7 @@ public class QuoteController {
     public ResponseEntity<ApiResponse<QuotesDto>> deleteIncentiveProduct(@Valid @RequestBody ShoppingCartItemDto itemsRequest) {
         try {
             // Obtener el cliente autenticado usando CustomerAuth
-            var customer = customerAuth.get();
+            //var customer = customerAuth.get();
             QuotesDto response = incentiveCartManagerService.deleteIncentiveProduct(itemsRequest);
             return ResponseEntity.ok(new ApiResponse<>(response, "Success", null));
         } catch (Exception ex) {
