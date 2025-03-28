@@ -104,8 +104,8 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
         Quotes dbQuotes = quotesService.findByQuotesId(shoppingCartItemRequest.quotes_id);
 
         // Obtener el stock disponible de todos los productos en una sola iteración
-        Map<String, Integer> stockMap = new HashMap<>();
-        int totalAvailableStock = 0;
+        Map<String, Integer> stockMap = new HashMap<>(); // map de inventario disponible
+        int totalAvailableStock = 0; // Inventario total disponible
         for (Products product : dbProducts) {
             int stock = stockClient.getStock(product.getId(), "CP001").block().getQty();
             stockMap.put(product.getId(), stock);
@@ -115,19 +115,19 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
             }
         }
 
-        if (totalAvailableStock < shoppingCartItemRequest.quantity) {
+        if (totalAvailableStock < shoppingCartItemRequest.quantity) { // Valida si inventario disponible no menor a solicitado
             throw new ProductException(
                     MessageFormat.format(
-                            "Cantidad solicitada {0}, disponible {1}", 
-                            shoppingCartItemRequest.quantity, 
+                            "Cantidad solicitada {0}, disponible {1}",
+                            shoppingCartItemRequest.quantity,
                             totalAvailableStock));
         }
 
-        int remainingQuantity = shoppingCartItemRequest.quantity;
-        QuotesDto quotesDto = quotesMapper.quotesToQuotesDto(dbQuotes);
+        int remainingQuantity = shoppingCartItemRequest.quantity; // Cantidad total solicitada
+        QuotesDto quotesDto = quotesMapper.quotesToQuotesDto(dbQuotes); // Carrito actaul del cliente
 
-        for (Products dbProduct : dbProducts) {
-            int availableStock = stockMap.getOrDefault(dbProduct.getId(), 0);
+        for (Products dbProduct : dbProducts) { // Itera sobre los productos sustitutos
+            int availableStock = stockMap.getOrDefault(dbProduct.getId(), 0); // disponible del sustituto
 
             if (availableStock > 0) {
                 int quantityToAdd = Math.min(availableStock, remainingQuantity);
@@ -162,7 +162,7 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
     }
 
     private QuotesDto makeQuotesResponse(QuotesDto quotes) {
-        QuotesDto response = new QuotesDto(quotes);
+        QuotesDto response = new QuotesDto().copyFrom(quotes);
 
         // Agrupar los elementos por substituteCode y sumar los valores
         Map<String, QuoteItemsDto> groupedItems = new HashMap<>();
@@ -177,18 +177,24 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
                 QuoteItemsDto existingItem = groupedItems.get(key);
 
                 existingItem.setQty(existingItem.getQty() + quoteItem.getQty());
+
                 existingItem.setTotal(
                         existingItem.getTotal() + quoteItem.getTotal());
-                existingItem.setTotalBasePrice(existingItem.getTotalBasePrice() 
+
+                existingItem.setTotalBasePrice(existingItem.getTotalBasePrice()
                         + quoteItem.getTotalBasePrice());
-                existingItem.setTotalDiscount(existingItem.getTotalDiscount() 
+
+                existingItem.setTotalDiscount(existingItem.getTotalDiscount()
                         + quoteItem.getTotalDiscount());
-                existingItem.setTotalInclTax(existingItem.getTotalInclTax() 
+
+                existingItem.setTotalInclTax(existingItem.getTotalInclTax()
                         + quoteItem.getTotalInclTax());
+
                 existingItem.setTotalOriginalBasePrice(
-                        existingItem.getTotalOriginalBasePrice() 
-                                + quoteItem.getTotalOriginalBasePrice());
-                existingItem.setTotalTaxAmount(existingItem.getTotalTaxAmount() 
+                        existingItem.getTotalOriginalBasePrice()
+                        + quoteItem.getTotalOriginalBasePrice());
+
+                existingItem.setTotalTaxAmount(existingItem.getTotalTaxAmount()
                         + quoteItem.getTotalTaxAmount());
             }
         }
@@ -212,18 +218,18 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
      * envío.
      */
     @Transactional(rollbackFor = Exception.class)
-    private QuotesDto updateQuoteWithExististItem(QuotesDto quotesDto, 
-            QuoteItemsDto quoteItemsDto, Products dbProduct, 
-            Date currentDateTime, int quantity, boolean isUpdateOnly) 
+    private QuotesDto updateQuoteWithExististItem(QuotesDto quotesDto,
+            QuoteItemsDto quoteItemsDto, Products dbProduct,
+            Date currentDateTime, int quantity, boolean isUpdateOnly)
             throws ShippingAddressException, ProductException {
 
         quotesDto.setUpdatedAt(currentDateTime);
 
-        QuoteItemsDto existingItemExist = 
-                quotesDto.getQuoteItemsCollection().stream()
-                .filter(item -> item.getQuoteItemsPK()
+        QuoteItemsDto existingItemExist
+                = quotesDto.getQuoteItemsCollection().stream()
+                        .filter(item -> item.getQuoteItemsPK()
                         .equals(quoteItemsDto.getQuoteItemsPK()))
-                .findFirst().get();
+                        .findFirst().get();
         if (isUpdateOnly == true) {
             existingItemExist.setQty(quantity);
         } else {
@@ -237,11 +243,11 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
 
         QuotesDto updatedQuotesDto = IAddQuoteItemService.addNewQuoteItem(
                 quotesDto, existingItemExist, dbProduct);
-        QuotesDto quoteDtoWithTotals = 
-                collectsQuoteTotalsService.quotesDto(updatedQuotesDto);
+        QuotesDto quoteDtoWithTotals
+                = collectsQuoteTotalsService.quotesDto(updatedQuotesDto);
 
-        Quotes quotesToUpdate = 
-                quotesMapper.quotesDtoToQuotes(quoteDtoWithTotals);
+        Quotes quotesToUpdate
+                = quotesMapper.quotesDtoToQuotes(quoteDtoWithTotals);
 
         updateQuoteHeaderWithTotals(quotesToUpdate);
 
@@ -261,8 +267,8 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
      * envío.
      */
     @Transactional(rollbackFor = Exception.class)
-    private QuotesDto addNewItemToQuote(QuotesDto quotesDto, 
-            QuoteItemsDto quoteItemsDto, int quantity, Products dbProduct, 
+    private QuotesDto addNewItemToQuote(QuotesDto quotesDto,
+            QuoteItemsDto quoteItemsDto, int quantity, Products dbProduct,
             Date currentDateTime) throws ShippingAddressException, ProductException {
 
         quoteItemsDto.setLineNumber(quotesDto.getLineNumber());
@@ -346,12 +352,15 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
      * @return el DTO de la clave primaria del ítem del carrito.
      */
     private QuoteItemsPKDto setQuoteItemsPKDto(QuotesDto quotesDto, Products dbProduct) {
+
+        String substituteCode = dbProduct.getSubstituteCode();
+
         QuoteItemsPKDto quoteItemsPKDto = new QuoteItemsPKDto();
 
         quoteItemsPKDto.setCustomersId(quotesDto.getCustomersId().getId());
         quoteItemsPKDto.setQuotesId(quotesDto.getId());
-        quoteItemsPKDto.setSku(dbProduct.getId());
-
+        quoteItemsPKDto.setSku((substituteCode == null || substituteCode.isEmpty()) ? dbProduct.getId() : substituteCode);
+        
         return quoteItemsPKDto;
     }
 

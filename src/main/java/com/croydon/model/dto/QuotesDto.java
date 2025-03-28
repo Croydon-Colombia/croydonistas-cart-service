@@ -108,7 +108,7 @@ public class QuotesDto {
     public Collection<QuoteIncentiveItemsDto> quoteIncentiveItemsCollection;
 
     // Constructor de copia
-    public QuotesDto(QuotesDto other) {
+    public QuotesDto copyFrom(QuotesDto other) {
         this.id = other.id;
         this.createdAt = other.createdAt;
         this.updatedAt = other.updatedAt;
@@ -152,5 +152,7 @@ public class QuotesDto {
         this.quoteIncentiveItemsCollection = (other.quoteIncentiveItemsCollection != null) ? new ArrayList<>(other.quoteIncentiveItemsCollection) : new ArrayList<>();
 
         this.customersId = other.customersId;
+        
+        return this;
     }
 }
