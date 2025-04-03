@@ -50,18 +50,6 @@ public class ProductsImpl implements IProducts {
     @Override
     public List<Products> findProductById(String id) throws ProductException {
 
-        Products product = productsDao.findById(id)
-                .orElseThrow(()
-                        -> new ProductException("Producto " + id + " no encontrado en DB"));//validamos producto por sku
-        List<Products> resultList = new ArrayList<>();//
-        resultList.add(product);
-
-        String CodeSustitute = product.getSubstituteCode();
-
-        if (CodeSustitute == null || CodeSustitute.isEmpty()) {
-            return resultList;//si  el producto no tiene un Codigo sustituto lo retorna
-        }
-
         List<Products> products = productsDao.findProductWithSubstitutes(id);
 
         if (products.isEmpty()) {
@@ -69,14 +57,10 @@ public class ProductsImpl implements IProducts {
         }
 
         // Si hay más de un producto, aplicamos lógica de selección (orden por prioridad, stock, etc.)
-        products.stream()
-                .filter(p -> !p.getId().equals(id)) // Excluye el principal si ya está
+        return products.stream()
                 .sorted(Comparator.comparingInt(Products::getSubstitutePriority))
-                .forEach(resultList::add);
+                .toList();
 
-        //retorna la lista  de productos encontrados  colocando primero la referencia solicitada
-        //seguido de los sustitutos ordenados segun prioridad
-        return resultList;
     }
 
     /**

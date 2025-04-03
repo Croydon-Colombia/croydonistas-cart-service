@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.croydon.service.IAddOrUpdateQuoteItem;
 import com.croydon.service.IQuoteItems;
+import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -123,26 +124,31 @@ public class ShoppingCartManagerImpl implements IShoppingCartManager {
         Quotes dbQuotes = quotesService.findByQuotesId(shoppingCartItemRequest.quotes_id);
         QuotesDto quotesDto = quotesMapper.quotesToQuotesDto(dbQuotes);
 
-        QuoteItems itemToRemove = dbQuotes.getQuoteItemsCollection()
-                .stream()
-                .filter(item -> item.getQuoteItemsPK().getSku().equals(shoppingCartItemRequest.getProductSku()))
-                .findFirst()
-                .orElseThrow(() -> new ShippingAddressException("Producto sku: " + shoppingCartItemRequest.getProductSku() + ", no encontrado en este pedido."));
+        // Filtrar los ítems a eliminar según el substituteCode
+        List<QuoteItems> itemsToDelete = dbQuotes.getQuoteItemsCollection().stream()
+                .filter(item -> item.getSubstituteCode().equals(shoppingCartItemRequest.getProductSku()))
+                .toList();
 
-        quotesDto.getQuoteItemsCollection()
-                .removeIf(item -> item.getQuoteItemsPK().getSku()
-                .equals(shoppingCartItemRequest.getProductSku())
-                );
+        if (itemsToDelete.isEmpty()) {
+            throw new ShippingAddressException("Producto sku: " + shoppingCartItemRequest.getProductSku() + " no encontrado en este pedido.");
+        }
 
+        // Eliminar los ítems del DTO y de la base de datos
+        itemsToDelete.forEach(item -> {
+            quotesDto.getQuoteItemsCollection().removeIf(dtoItem
+                    -> dtoItem.getQuoteItemsPK().getSku().equals(item.getQuoteItemsPK().getSku()));
+
+            // Eliminar de la base de datos
+            quoteItemsService.delete(item);
+        });
+
+        // Calcular totales después de la eliminación
         QuotesDto quoteDtoWithTotals = collectsQuoteTotalsService.quotesDto(quotesDto);
-
         quoteDtoWithTotals.setUpdatedAt(currentDateTime);
 
+        // Actualizar la cabecera con los nuevos totales
         Quotes quotesToUpdate = quotesMapper.quotesDtoToQuotes(quoteDtoWithTotals);
-
         updateQuoteHeaderWithTotals(quotesToUpdate);
-
-        quoteItemsService.delete(itemToRemove);
 
         return quoteDtoWithTotals;
     }

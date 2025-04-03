@@ -24,6 +24,7 @@ import com.croydon.model.dto.QuoteItemsPKDto;
 import com.croydon.model.dto.QuotesDto;
 import com.croydon.model.dto.ShoppingCartItemDto;
 import com.croydon.model.entity.Products;
+import com.croydon.model.entity.QuoteItems;
 import com.croydon.model.entity.Quotes;
 import com.croydon.model.entity.RequestsWithoutInventory;
 import com.croydon.service.IAddQuoteItem;
@@ -37,6 +38,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.croydon.service.IAddOrUpdateQuoteItem;
+import com.croydon.service.IQuoteItems;
 import com.croydon.service.IRequestsWithoutInventory;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -79,6 +81,9 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
 
     @Autowired
     private IRequestsWithoutInventory requestsWithoutInventoryService;
+
+    @Autowired
+    IQuoteItems quoteItemsService;
 
     /**
      * Agrega o actualiza un producto en el carrito de compras.
@@ -123,8 +128,21 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
                             totalAvailableStock));
         }
 
+        boolean containsSku = dbQuotes.getQuoteItemsCollection().stream()
+                .anyMatch(item -> item.getSubstituteCode().equals(shoppingCartItemRequest.getProductSku()));
+
+        QuotesDto quotesDto;
+
+        if (containsSku) {
+            quotesDto = this.deleteCartProduct(dbQuotes, shoppingCartItemRequest.getProductSku());
+        } else {
+            quotesDto = quotesMapper.quotesToQuotesDto(dbQuotes);
+        }
+
+        
+        
         int remainingQuantity = shoppingCartItemRequest.quantity; // Cantidad total solicitada
-        QuotesDto quotesDto = quotesMapper.quotesToQuotesDto(dbQuotes); // Carrito actaul del cliente
+        // Carrito actaul del cliente
 
         for (Products dbProduct : dbProducts) { // Itera sobre los productos sustitutos
             int availableStock = stockMap.getOrDefault(dbProduct.getId(), 0); // disponible del sustituto
@@ -171,6 +189,7 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
             String key = quoteItem.getSubstituteCode();
             if (!groupedItems.containsKey(key)) {
                 QuoteItemsDto newItem = new QuoteItemsDto().copyFrom(quoteItem);
+                newItem.getQuoteItemsPK().setSku(key);
                 groupedItems.put(key, newItem);
             } else {
                 // Si ya existe en el mapa, sumamos los valores
@@ -359,8 +378,9 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
 
         quoteItemsPKDto.setCustomersId(quotesDto.getCustomersId().getId());
         quoteItemsPKDto.setQuotesId(quotesDto.getId());
-        quoteItemsPKDto.setSku((substituteCode == null || substituteCode.isEmpty()) ? dbProduct.getId() : substituteCode);
-        
+        quoteItemsPKDto.setSku(dbProduct.getId());
+        //   quoteItemsPKDto.setSku((substituteCode == null || substituteCode.isEmpty()) ? dbProduct.getId() : substituteCode);
+
         return quoteItemsPKDto;
     }
 
@@ -371,4 +391,39 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
         quoteUpdate.setQuoteTotalsCollection(null);
         quotesService.save(quoteUpdate);
     }
+
+    private QuotesDto deleteCartProduct(Quotes dbQuotes, String sku) throws ShippingAddressException {
+        Date currentDateTime = DateUtils.getCurrentDate();
+
+        QuotesDto quotesDto = quotesMapper.quotesToQuotesDto(dbQuotes);
+
+        // Filtrar los ítems a eliminar según el substituteCode
+        List<QuoteItems> itemsToDelete = dbQuotes.getQuoteItemsCollection().stream()
+                .filter(item -> item.getSubstituteCode().equals(sku))
+                .toList();
+
+        if (itemsToDelete.isEmpty()) {
+            throw new ShippingAddressException("Producto sku: " + sku + " no encontrado en este pedido.");
+        }
+
+        // Eliminar los ítems del DTO y de la base de datos
+        itemsToDelete.forEach(item -> {
+            quotesDto.getQuoteItemsCollection().removeIf(dtoItem
+                    -> dtoItem.getSubstituteCode().equals(sku));
+
+            // Eliminar de la base de datos
+            quoteItemsService.delete(item);
+        });
+
+        // Calcular totales después de la eliminación
+        QuotesDto quoteDtoWithTotals = collectsQuoteTotalsService.quotesDto(quotesDto);
+        quoteDtoWithTotals.setUpdatedAt(currentDateTime);
+
+        // Actualizar la cabecera con los nuevos totales
+        Quotes quotesToUpdate = quotesMapper.quotesDtoToQuotes(quoteDtoWithTotals);
+        updateQuoteHeaderWithTotals(quotesToUpdate);
+
+        return quoteDtoWithTotals;
+    }
+
 }

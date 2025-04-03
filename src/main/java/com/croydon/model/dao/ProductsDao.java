@@ -28,8 +28,10 @@ public interface ProductsDao extends CrudRepository<Products, String> {
     @Query("SELECT q FROM Products q WHERE q.id = :sku AND q.incentive = true")
     Products findIncetiveBySku(@Param("sku") String sku);
 
-    @Query("SELECT p FROM Products p WHERE p.id = :sku OR p.substituteCode = "
-            + "(SELECT p2.substituteCode FROM Products p2 WHERE p2.id = :sku)")
+    @Query("SELECT p FROM Products p WHERE p.id = :sku "
+            + "OR (p.substituteCode <> '' AND p.substituteCode = "
+            + "(SELECT p2.substituteCode FROM Products p2 WHERE p2.id = :sku AND p2.substituteCode <> '')) "
+            + "OR p.substituteCode = :sku")
     List<Products> findProductWithSubstitutes(@Param("sku") String sku);
 
 }
