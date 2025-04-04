@@ -184,5 +184,8 @@ public class QuoteItems {
     public Collection<EmployeeLineItems> employeeLineItemsCollection;
 
     @Column(name = "substitute_code")
-    private String substituteCode;
+    public String substituteCode;
+    
+    @Column(name = "is_substitute")
+    public boolean isSubstitute;
 }

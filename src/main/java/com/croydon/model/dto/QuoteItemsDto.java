@@ -95,6 +95,8 @@ public class QuoteItemsDto {
     public List<EmployeeLineItemsDto> employeeLineItemsCollection;
 
     public String substituteCode;
+    
+    public Boolean isSubstitute;
 
     public QuoteItemsDto copyFrom(QuoteItemsDto source) {
         this.quoteItemsPK = source.quoteItemsPK;
@@ -125,6 +127,7 @@ public class QuoteItemsDto {
         this.thumbnail = source.thumbnail;
         this.unidadPum = source.unidadPum;
         this.substituteCode = source.substituteCode;
+        this.isSubstitute = source.isSubstitute;
 
         // Agregar los valores sumables
         this.qty = source.qty;

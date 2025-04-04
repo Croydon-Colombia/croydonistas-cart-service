@@ -158,6 +158,9 @@ public class AddOrUpdateQuoteItemImpl implements IAddOrUpdateQuoteItem {
 
                 if (substituteCode != null && !substituteCode.isEmpty()) {
                     quoteItemsDto.setName(dbProduct.getSubstituteDescription());
+                    quoteItemsDto.setIsSubstitute(true);
+                }else{
+                    quoteItemsDto.setIsSubstitute(false);
                 }
 
                 quoteItemsDto.setQuoteItemsPK(setQuoteItemsPKDto(quotesDto, dbProduct));
